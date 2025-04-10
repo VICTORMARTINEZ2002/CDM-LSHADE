@@ -1,23 +1,20 @@
 HEADER = de.h
 TARGET = solver
 
-OBJS := $(patsubst %.cc,%.o,$(shell find src -name '*.cc'))
-CC = g++
+OBJS := $(patsubst %.cpp,%.o,$(shell find src -name '*.cpp'))
 OPTION = -std=c++14 -O3
-LIB_DIR = ./lib
-INC_DIR = ./include
 
 # Link the static library directly
-LDFLAGS = $(LIB_DIR)/libpyclustering.a -lm
+LDFLAGS = ./lib/libpyclustering.a -lm
 
 # Add -I to specify the header file directory
-CFLAGS = -I$(INC_DIR) -I$(INC_DIR)/pyclustering
+CFLAGS = -I./include -I./include/pyclustering
 
 $(TARGET): $(OBJS)
-	$(CC) -o $(TARGET) $(OBJS) $(OPTION) $(LDFLAGS)
+	g++ -o $(TARGET) $(OBJS) $(OPTION) $(LDFLAGS)
 
-%.o: %.cc
-	$(CC) $(CFLAGS) -c $< -o $@
+%.o: %.cpp
+	g++ $(CFLAGS) -c $< -o $@
 
-clean:
+cls:
 	rm -rf src/*.o $(TARGET)
