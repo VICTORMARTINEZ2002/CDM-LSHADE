@@ -4,8 +4,8 @@ TARGET = solver
 OBJS := $(patsubst %.cc,%.o,$(shell find src -name '*.cc'))
 CC = g++
 OPTION = -std=c++14 -O3
-LIB_DIR = ./src/lib
-INC_DIR = ./src/include
+LIB_DIR = ./lib
+INC_DIR = ./include
 
 # Link the static library directly
 LDFLAGS = $(LIB_DIR)/libpyclustering.a -lm
