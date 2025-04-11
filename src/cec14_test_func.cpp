@@ -15,54 +15,54 @@
 #define E  2.7182818284590452353602874713526625
 #define PI 3.1415926535897932384626433832795029
 
-void sphere_func (double *, double *, int , double *,double *, int, int); /* Sphere */
-void ellips_func(double *, double *, int , double *,double *, int, int); /* Ellipsoidal */
-void bent_cigar_func(double *, double *, int , double *,double *, int, int); /* Discus */
-void discus_func(double *, double *, int , double *,double *, int, int);  /* Bent_Cigar */
-void dif_powers_func(double *, double *, int , double *,double *, int, int);  /* Different Powers */
-void rosenbrock_func (double *, double *, int , double *,double *, int, int); /* Rosenbrock's */
-void schaffer_F7_func (double *, double *, int , double *,double *, int, int); /* Schwefel's F7 */
-void ackley_func (double *, double *, int , double *,double *, int, int); /* Ackley's */
-void rastrigin_func (double *, double *, int , double *,double *, int, int); /* Rastrigin's  */
-void weierstrass_func (double *, double *, int , double *,double *, int, int); /* Weierstrass's  */
-void griewank_func (double *, double *, int , double *,double *, int, int); /* Griewank's  */
-void schwefel_func (double *, double *, int , double *,double *, int, int); /* Schwefel's */
-void katsuura_func (double *, double *, int , double *,double *, int, int); /* Katsuura */
-void bi_rastrigin_func (double *, double *, int , double *,double *, int, int); /* Lunacek Bi_rastrigin */
-void grie_rosen_func (double *, double *, int , double *,double *, int, int); /* Griewank-Rosenbrock  */
-void escaffer6_func (double *, double *, int , double *,double *, int, int); /* Expanded Scaffer??s F6  */
-void step_rastrigin_func (double *, double *, int , double *,double *, int, int); /* Noncontinuous Rastrigin's  */
-void happycat_func (double *, double *, int , double *,double *, int, int); /* HappyCat */
-void hgbat_func (double *, double *, int , double *,double *, int, int); /* HGBat  */
+void         sphere_func(double*, double*, int , double*,double*, int, int); /* Sphere */
+void         ellips_func(double*, double*, int , double*,double*, int, int); /* Ellipsoidal */
+void     bent_cigar_func(double*, double*, int , double*,double*, int, int); /* Discus */
+void         discus_func(double*, double*, int , double*,double*, int, int);  /* Bent_Cigar */
+void     dif_powers_func(double*, double*, int , double*,double*, int, int);  /* Different Powers */
+void     rosenbrock_func(double*, double*, int , double*,double*, int, int); /* Rosenbrock's */
+void    schaffer_F7_func(double*, double*, int , double*,double*, int, int); /* Schwefel's F7 */
+void 		 ackley_func(double*, double*, int , double*,double*, int, int); /* Ackley's */
+void 	  rastrigin_func(double*, double*, int , double*,double*, int, int); /* Rastrigin's  */
+void 	weierstrass_func(double*, double*, int , double*,double*, int, int); /* Weierstrass's  */
+void	   griewank_func(double*, double*, int , double*,double*, int, int); /* Griewank's  */
+void       schwefel_func(double*, double*, int , double*,double*, int, int); /* Schwefel's */
+void       katsuura_func(double*, double*, int , double*,double*, int, int); /* Katsuura */
+void   bi_rastrigin_func(double*, double*, int , double*,double*, int, int); /* Lunacek Bi_rastrigin */
+void     grie_rosen_func(double*, double*, int , double*,double*, int, int); /* Griewank-Rosenbrock  */
+void      escaffer6_func(double*, double*, int , double*,double*, int, int); /* Expanded Scaffer??s F6  */
+void step_rastrigin_func(double*, double*, int , double*,double*, int, int); /* Noncontinuous Rastrigin's  */
+void       happycat_func(double*, double*, int , double*,double*, int, int); /* HappyCat */
+void          hgbat_func(double*, double*, int , double*,double*, int, int); /* HGBat  */
 
-void hf01 (double *, double *, int, double *,double *, int *,int, int); /* Hybrid Function 1 */
-void hf02 (double *, double *, int, double *,double *, int *,int, int); /* Hybrid Function 2 */
-void hf03 (double *, double *, int, double *,double *, int *,int, int); /* Hybrid Function 3 */
-void hf04 (double *, double *, int, double *,double *, int *,int, int); /* Hybrid Function 4 */
-void hf05 (double *, double *, int, double *,double *, int *,int, int); /* Hybrid Function 5 */
-void hf06 (double *, double *, int, double *,double *, int *,int, int); /* Hybrid Function 6 */
+void hf01 (double*, double*, int, double*,double*, int *,int, int); /* Hybrid Function 1 */
+void hf02 (double*, double*, int, double*,double*, int *,int, int); /* Hybrid Function 2 */
+void hf03 (double*, double*, int, double*,double*, int *,int, int); /* Hybrid Function 3 */
+void hf04 (double*, double*, int, double*,double*, int *,int, int); /* Hybrid Function 4 */
+void hf05 (double*, double*, int, double*,double*, int *,int, int); /* Hybrid Function 5 */
+void hf06 (double*, double*, int, double*,double*, int *,int, int); /* Hybrid Function 6 */
 
-void cf01 (double *, double *, int , double *,double *, int); /* Composition Function 1 */
-void cf02 (double *, double *, int , double *,double *, int); /* Composition Function 2 */
-void cf03 (double *, double *, int , double *,double *, int); /* Composition Function 3 */
-void cf04 (double *, double *, int , double *,double *, int); /* Composition Function 4 */
-void cf05 (double *, double *, int , double *,double *, int); /* Composition Function 5 */
-void cf06 (double *, double *, int , double *,double *, int); /* Composition Function 6 */
-void cf07 (double *, double *, int , double *,double *, int *, int); /* Composition Function 7 */
-void cf08 (double *, double *, int , double *,double *, int *, int); /* Composition Function 8 */
+void cf01 (double*, double*, int , double*,double*, int); /* Composition Function 1 */
+void cf02 (double*, double*, int , double*,double*, int); /* Composition Function 2 */
+void cf03 (double*, double*, int , double*,double*, int); /* Composition Function 3 */
+void cf04 (double*, double*, int , double*,double*, int); /* Composition Function 4 */
+void cf05 (double*, double*, int , double*,double*, int); /* Composition Function 5 */
+void cf06 (double*, double*, int , double*,double*, int); /* Composition Function 6 */
+void cf07 (double*, double*, int , double*,double*, int *, int); /* Composition Function 7 */
+void cf08 (double*, double*, int , double*,double*, int *, int); /* Composition Function 8 */
 
-void shiftfunc (double*,double*,int,double*);
-void rotatefunc (double*,double*,int, double*);
-void sr_func (double *, double *, int, double*, double*, double, int, int); /* shift and rotate */
-void asyfunc (double *, double *x, int, double);
-void oszfunc (double *, double *, int);
-void cf_cal(double *, double *, int, double *,double *,double *,double *,int);
+void  shiftfunc(double*, double*, int, double*);
+void rotatefunc(double*, double*, int, double*);
+void    sr_func(double*, double*, int, double*, double*, double, int, int); /* shift and rotate */
+void    asyfunc(double*, double*, int, double);
+void    oszfunc(double*, double*, int);
+void     cf_cal(double*, double*, int, double*, double*, double*, double*,int);
 
-extern double *OShift,*M,*y,*z,*x_bound;
+extern double*OShift,*M,*y,*z,*x_bound;
 extern int ini_flag,n_flag,func_flag,*SS;
 
 
-void cec14_test_func(double *x, double *f, int nx, int mx,int func_num)
+void cec14_test_func(double*x, double*f, int nx, int mx,int func_num)
 {
 	int cf_num=10,i,j;
 	if (ini_flag==1)
@@ -82,9 +82,9 @@ void cec14_test_func(double *x, double *f, int nx, int mx,int func_num)
 		free(y);
 		free(z);
 		free(x_bound);
-		y=(double *)malloc(sizeof(double)  *  nx);
-		z=(double *)malloc(sizeof(double)  *  nx);
-		x_bound=(double *)malloc(sizeof(double)  *  nx);
+		y=(double*)malloc(sizeof(double)  *  nx);
+		z=(double*)malloc(sizeof(double)  *  nx);
+		x_bound=(double*)malloc(sizeof(double)  *  nx);
 		for (i=0; i<nx; i++)
 			x_bound[i]=100.0;
 
@@ -136,7 +136,7 @@ void cec14_test_func(double *x, double *f, int nx, int mx,int func_num)
 
 		if (func_num<23)
 		{
-			OShift=(double *)malloc(nx*sizeof(double));
+			OShift=(double*)malloc(nx*sizeof(double));
 			if (OShift==NULL)
 			printf("\nError: there is insufficient memory available!\n");
 			for(i=0;i<nx;i++)
@@ -146,7 +146,7 @@ void cec14_test_func(double *x, double *f, int nx, int mx,int func_num)
 		}
 		else
 		{
-			OShift=(double *)malloc(nx*cf_num*sizeof(double));
+			OShift=(double*)malloc(nx*cf_num*sizeof(double));
 			if (OShift==NULL)
 			printf("\nError: there is insufficient memory available!\n");
 			for(i=0;i<cf_num-1;i++)
@@ -345,11 +345,11 @@ void cec14_test_func(double *x, double *f, int nx, int mx,int func_num)
 
 }
 
-void sphere_func (double *x, double *f, int nx, double *Os, double *Mr, int s_flag, int r_flag) /* Sphere */
+void sphere_func(double*x, double*f, int nx, double*Os, double*Mr, int s_flag, int r_flag) /* Sphere */
 {
 	int i;
 	f[0] = 0.0;
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */	
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */	
 	for (i=0; i<nx; i++)
 	{					
 		f[0] += z[i]*z[i];
@@ -359,21 +359,21 @@ void sphere_func (double *x, double *f, int nx, double *Os, double *Mr, int s_fl
 
 
 
-void ellips_func (double *x, double *f, int nx, double *Os,double *Mr, int s_flag, int r_flag) /* Ellipsoidal */
+void ellips_func(double*x, double*f, int nx, double*Os,double*Mr, int s_flag, int r_flag) /* Ellipsoidal */
 {
     int i;
 	f[0] = 0.0;
-	sr_func (x, z, nx, Os, Mr,1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr,1.0, s_flag, r_flag); /* shift and rotate */
 	for (i=0; i<nx; i++)
 	{
        f[0] += pow(10.0,6.0*i/(nx-1))*z[i]*z[i];
 	}
 }
 
-void bent_cigar_func (double *x, double *f, int nx, double *Os,double *Mr, int s_flag, int r_flag) /* Bent_Cigar */
+void bent_cigar_func(double*x, double*f, int nx, double*Os,double*Mr, int s_flag, int r_flag) /* Bent_Cigar */
 {
     int i;
-	sr_func (x, z, nx, Os, Mr,1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr,1.0, s_flag, r_flag); /* shift and rotate */
 
 	f[0] = z[0]*z[0];
 	for (i=1; i<nx; i++)
@@ -384,10 +384,10 @@ void bent_cigar_func (double *x, double *f, int nx, double *Os,double *Mr, int s
 
 }
 
-void discus_func (double *x, double *f, int nx, double *Os,double *Mr, int s_flag, int r_flag) /* Discus */
+void discus_func(double*x, double*f, int nx, double*Os,double*Mr, int s_flag, int r_flag) /* Discus */
 {
     int i;
-	sr_func (x, z, nx, Os, Mr,1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr,1.0, s_flag, r_flag); /* shift and rotate */
 	f[0] = pow(10.0,6.0)*z[0]*z[0];
 	for (i=1; i<nx; i++)
 	{
@@ -395,11 +395,11 @@ void discus_func (double *x, double *f, int nx, double *Os,double *Mr, int s_fla
 	}
 }
 
-void dif_powers_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Different Powers */
+void dif_powers_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Different Powers */
 {
 	int i;
 	f[0] = 0.0;
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -409,12 +409,12 @@ void dif_powers_func (double *x, double *f, int nx, double *Os,double *Mr,int s_
 }
 
 
-void rosenbrock_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Rosenbrock's */
+void rosenbrock_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Rosenbrock's */
 {
     int i;
 	double tmp1,tmp2;
 	f[0] = 0.0;
-	sr_func (x, z, nx, Os, Mr, 2.048/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 2.048/100.0, s_flag, r_flag); /* shift and rotate */
 	z[0] += 1.0;//shift to orgin
 	for (i=0; i<nx-1; i++)
 	{
@@ -425,12 +425,12 @@ void rosenbrock_func (double *x, double *f, int nx, double *Os,double *Mr,int s_
 	}
 }
 
-void schaffer_F7_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Schwefel's 1.2  */
+void schaffer_F7_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Schwefel's 1.2  */
 {
     int i;
 	double tmp;
     f[0] = 0.0;
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 	for (i=0; i<nx-1; i++)	
 	{
 		z[i]=pow(y[i]*y[i]+y[i+1]*y[i+1],0.5);
@@ -440,14 +440,14 @@ void schaffer_F7_func (double *x, double *f, int nx, double *Os,double *Mr,int s
 	f[0] = f[0]*f[0]/(nx-1)/(nx-1);
 }
 
-void ackley_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Ackley's  */
+void ackley_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Ackley's  */
 {
     int i;
     double sum1, sum2;
     sum1 = 0.0;
     sum2 = 0.0;
 
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -460,7 +460,7 @@ void ackley_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag
 }
 
 
-void weierstrass_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Weierstrass's  */
+void weierstrass_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Weierstrass's  */
 {
     int i,j,k_max;
     double sum,sum2, a, b;
@@ -469,7 +469,7 @@ void weierstrass_func (double *x, double *f, int nx, double *Os,double *Mr,int s
     k_max = 20;
     f[0] = 0.0;
 
-	sr_func (x, z, nx, Os, Mr, 0.5/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 0.5/100.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -486,14 +486,14 @@ void weierstrass_func (double *x, double *f, int nx, double *Os,double *Mr,int s
 }
 
 
-void griewank_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Griewank's  */
+void griewank_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Griewank's  */
 {
     int i;
     double s, p;
     s = 0.0;
     p = 1.0;
 
-	sr_func (x, z, nx, Os, Mr, 600.0/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 600.0/100.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -503,12 +503,12 @@ void griewank_func (double *x, double *f, int nx, double *Os,double *Mr,int s_fl
 	f[0] = 1.0 + s/4000.0 - p;
 }
 
-void rastrigin_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Rastrigin's  */
+void rastrigin_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Rastrigin's  */
 {
     int i;
 	f[0] = 0.0;
 
-	sr_func (x, z, nx, Os, Mr, 5.12/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 5.12/100.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -516,7 +516,7 @@ void rastrigin_func (double *x, double *f, int nx, double *Os,double *Mr,int s_f
 	}
 }
 
-void step_rastrigin_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Noncontinuous Rastrigin's  */
+void step_rastrigin_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Noncontinuous Rastrigin's  */
 {
     int i;
 	f[0]=0.0;
@@ -526,7 +526,7 @@ void step_rastrigin_func (double *x, double *f, int nx, double *Os,double *Mr,in
 		y[i]=Os[i]+floor(2*(y[i]-Os[i])+0.5)/2;
 	}
 
-	sr_func (x, z, nx, Os, Mr, 5.12/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 5.12/100.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -534,13 +534,13 @@ void step_rastrigin_func (double *x, double *f, int nx, double *Os,double *Mr,in
 	}
 }
 
-void schwefel_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Schwefel's  */
+void schwefel_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Schwefel's  */
 {
     int i;
 	double tmp;
 	f[0]=0.0;
 
-	sr_func (x, z, nx, Os, Mr, 1000.0/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1000.0/100.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -564,14 +564,14 @@ void schwefel_func (double *x, double *f, int nx, double *Os,double *Mr,int s_fl
 
 }
 
-void katsuura_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Katsuura  */
+void katsuura_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Katsuura  */
 {
     int i,j;
 	double temp,tmp1,tmp2,tmp3;
 	f[0]=1.0;
 	tmp3=pow(1.0*nx,1.2);
 
-	sr_func (x, z, nx, Os, Mr, 5.0/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 5.0/100.0, s_flag, r_flag); /* shift and rotate */
 
     for (i=0; i<nx; i++)
 	{
@@ -589,12 +589,12 @@ void katsuura_func (double *x, double *f, int nx, double *Os,double *Mr,int s_fl
 
 }
 
-void bi_rastrigin_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Lunacek Bi_rastrigin Function */
+void bi_rastrigin_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Lunacek Bi_rastrigin Function */
 {
     int i;
 	double mu0=2.5,d=1.0,s,mu1,tmp,tmp1,tmp2;
-	double *tmpx;
-	tmpx=(double *)malloc(sizeof(double)  *  nx);
+	double*tmpx;
+	tmpx=(double*)malloc(sizeof(double)  *  nx);
 	s=1.0-1.0/(2.0*pow(nx+20.0,0.5)-8.2);
 	mu1=-pow((mu0*mu0-d)/s,0.5);
 
@@ -664,13 +664,13 @@ void bi_rastrigin_func (double *x, double *f, int nx, double *Os,double *Mr,int 
 	free(tmpx);
 }
 
-void grie_rosen_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Griewank-Rosenbrock  */
+void grie_rosen_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Griewank-Rosenbrock  */
 {
     int i;
     double temp,tmp1,tmp2;
     f[0]=0.0;
 
-	sr_func (x, z, nx, Os, Mr, 5.0/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 5.0/100.0, s_flag, r_flag); /* shift and rotate */
 
 	z[0] += 1.0;//shift to orgin
     for (i=0; i<nx-1; i++)
@@ -688,12 +688,12 @@ void grie_rosen_func (double *x, double *f, int nx, double *Os,double *Mr,int s_
 }
 
 
-void escaffer6_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* Expanded Scaffer??s F6  */
+void escaffer6_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* Expanded Scaffer??s F6  */
 {
     int i;
     double temp1, temp2;
 
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 
     f[0] = 0.0;
     for (i=0; i<nx-1; i++)
@@ -709,14 +709,14 @@ void escaffer6_func (double *x, double *f, int nx, double *Os,double *Mr,int s_f
     f[0] += 0.5 + (temp1-0.5)/(temp2*temp2);
 }
 
-void happycat_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* HappyCat, provdided by Hans-Georg Beyer (HGB) */
+void happycat_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* HappyCat, provdided by Hans-Georg Beyer (HGB) */
 /* original global optimum: [-1,-1,...,-1] */
 {
 	int i;
 	double alpha,r2,sum_z;
 	alpha=1.0/8.0;
 	
-	sr_func (x, z, nx, Os, Mr, 5.0/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 5.0/100.0, s_flag, r_flag); /* shift and rotate */
 
 	r2 = 0.0;
 	sum_z=0.0;
@@ -729,14 +729,14 @@ void happycat_func (double *x, double *f, int nx, double *Os,double *Mr,int s_fl
     f[0]=pow(fabs(r2-nx),2*alpha) + (0.5*r2 + sum_z)/nx + 0.5;
 }
 
-void hgbat_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag, int r_flag) /* HGBat, provdided by Hans-Georg Beyer (HGB)*/
+void hgbat_func(double*x, double*f, int nx, double*Os,double*Mr,int s_flag, int r_flag) /* HGBat, provdided by Hans-Georg Beyer (HGB)*/
 /* original global optimum: [-1,-1,...,-1] */
 {
 	int i;
 	double alpha,r2,sum_z;
 	alpha=1.0/4.0;
 
-	sr_func (x, z, nx, Os, Mr, 5.0/100.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 5.0/100.0, s_flag, r_flag); /* shift and rotate */
 
 	r2 = 0.0;
 	sum_z=0.0;
@@ -749,7 +749,7 @@ void hgbat_func (double *x, double *f, int nx, double *Os,double *Mr,int s_flag,
     f[0]=pow(fabs(pow(r2,2.0)-pow(sum_z,2.0)),2*alpha) + (0.5*r2 + sum_z)/nx + 0.5;
 }
 
-void hf01 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 1 */
+void hf01 (double*x, double*f, int nx, double*Os,double*Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 1 */
 {
 	int i,tmp,cf_num=3;
 	double fit[3];
@@ -769,7 +769,7 @@ void hf01 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 		G[i] = G[i-1]+G_nx[i-1];
 	}
 
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -788,7 +788,7 @@ void hf01 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 	}
 }
 
-void hf02 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 2 */
+void hf02 (double*x, double*f, int nx, double*Os,double*Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 2 */
 {
 	int i,tmp,cf_num=3;
 	double fit[3];
@@ -809,7 +809,7 @@ void hf02 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 		G[i] = G[i-1]+G_nx[i-1];
 	}
 
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -829,7 +829,7 @@ void hf02 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 	}
 }
 
-void hf03 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 3 */
+void hf03 (double*x, double*f, int nx, double*Os,double*Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 3 */
 {
 	int i,tmp,cf_num=4;
 	double fit[4];
@@ -850,7 +850,7 @@ void hf03 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 		G[i] = G[i-1]+G_nx[i-1];
 	}
 
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -872,7 +872,7 @@ void hf03 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 	}
 }
 
-void hf04 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 4 */
+void hf04 (double*x, double*f, int nx, double*Os,double*Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 4 */
 {
 	int i,tmp,cf_num=4;
 	double fit[4];
@@ -893,7 +893,7 @@ void hf04 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 		G[i] = G[i-1]+G_nx[i-1];
 	}
 
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -914,7 +914,7 @@ void hf04 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 		f[0] += fit[i];
 	}
 }
-void hf05 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 5 */
+void hf05 (double*x, double*f, int nx, double*Os,double*Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 5 */
 {
 	int i,tmp,cf_num=5;
 	double fit[5];
@@ -935,7 +935,7 @@ void hf05 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 		G[i] = G[i-1]+G_nx[i-1];
 	}
 
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -959,7 +959,7 @@ void hf05 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 	}
 }
 
-void hf06 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 6 */
+void hf06 (double*x, double*f, int nx, double*Os,double*Mr,int *S,int s_flag,int r_flag) /* Hybrid Function 6 */
 {
 	int i,tmp,cf_num=5;
 	double fit[5];
@@ -980,7 +980,7 @@ void hf06 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 		G[i] = G[i-1]+G_nx[i-1];
 	}
 
-	sr_func (x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
+	sr_func(x, z, nx, Os, Mr, 1.0, s_flag, r_flag); /* shift and rotate */
 
 	for (i=0; i<nx; i++)
 	{
@@ -1003,7 +1003,7 @@ void hf06 (double *x, double *f, int nx, double *Os,double *Mr,int *S,int s_flag
 	}
 }
 
-void cf01 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Composition Function 1 */
+void cf01 (double*x, double*f, int nx, double*Os,double*Mr,int r_flag) /* Composition Function 1 */
 {
 	int i,cf_num=5;
 	double fit[5];
@@ -1028,7 +1028,7 @@ void cf01 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Co
 	cf_cal(x, f, nx, Os, delta,bias,fit,cf_num);
 }
 
-void cf02 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Composition Function 2 */
+void cf02 (double*x, double*f, int nx, double*Os,double*Mr,int r_flag) /* Composition Function 2 */
 {
 	int i,cf_num=3;
 	double fit[3];
@@ -1044,7 +1044,7 @@ void cf02 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Co
 	cf_cal(x, f, nx, Os, delta,bias,fit,cf_num);
 }
 
-void cf03 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Composition Function 3 */
+void cf03 (double*x, double*f, int nx, double*Os,double*Mr,int r_flag) /* Composition Function 3 */
 {
 	int i,cf_num=3;
 	double fit[3];
@@ -1062,7 +1062,7 @@ void cf03 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Co
 	cf_cal(x, f, nx, Os, delta,bias,fit,cf_num);
 }
 
-void cf04 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Composition Function 4 */
+void cf04 (double*x, double*f, int nx, double*Os,double*Mr,int r_flag) /* Composition Function 4 */
 {
 	int i,cf_num=5;
 	double fit[5];
@@ -1086,7 +1086,7 @@ void cf04 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Co
 	cf_cal(x, f, nx, Os, delta,bias,fit,cf_num);
 }
 
-void cf05 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Composition Function 4 */
+void cf05 (double*x, double*f, int nx, double*Os,double*Mr,int r_flag) /* Composition Function 4 */
 {
 	int i,cf_num=5;
 	double fit[5];
@@ -1110,7 +1110,7 @@ void cf05 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Co
 	cf_cal(x, f, nx, Os, delta,bias,fit,cf_num);
 }
 
-void cf06 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Composition Function 6 */
+void cf06 (double*x, double*f, int nx, double*Os,double*Mr,int r_flag) /* Composition Function 6 */
 {
 	int i,cf_num=5;
 	double fit[5];
@@ -1134,7 +1134,7 @@ void cf06 (double *x, double *f, int nx, double *Os,double *Mr,int r_flag) /* Co
 	cf_cal(x, f, nx, Os, delta,bias,fit,cf_num);
 }
 
-void cf07 (double *x, double *f, int nx, double *Os,double *Mr,int *SS,int r_flag) /* Composition Function 7 */
+void cf07 (double*x, double*f, int nx, double*Os,double*Mr,int *SS,int r_flag) /* Composition Function 7 */
 {
 	int i,cf_num=3;
 	double fit[3];
@@ -1149,7 +1149,7 @@ void cf07 (double *x, double *f, int nx, double *Os,double *Mr,int *SS,int r_fla
 	cf_cal(x, f, nx, Os, delta,bias,fit,cf_num);
 }
 
-void cf08 (double *x, double *f, int nx, double *Os,double *Mr,int *SS,int r_flag) /* Composition Function 8 */
+void cf08 (double*x, double*f, int nx, double*Os,double*Mr,int *SS,int r_flag) /* Composition Function 8 */
 {
 	int i,cf_num=3;
 	double fit[3];
@@ -1166,7 +1166,7 @@ void cf08 (double *x, double *f, int nx, double *Os,double *Mr,int *SS,int r_fla
 
 
 
-void shiftfunc (double *x, double *xshift, int nx,double *Os)
+void shiftfunc(double*x, double*xshift, int nx,double*Os)
 {
 	int i;
     for (i=0; i<nx; i++)
@@ -1175,11 +1175,9 @@ void shiftfunc (double *x, double *xshift, int nx,double *Os)
     }
 }
 
-void rotatefunc (double *x, double *xrot, int nx,double *Mr)
-{
+void rotatefunc(double*x, double*xrot, int nx,double*Mr){
 	int i,j;
-    for (i=0; i<nx; i++)
-    {
+    for(i=0; i<nx; i++){
         xrot[i]=0;
 			for (j=0; j<nx; j++)
 			{
@@ -1188,7 +1186,7 @@ void rotatefunc (double *x, double *xrot, int nx,double *Mr)
     }
 }
 
-void sr_func (double *x, double *sr_x, int nx, double *Os,double *Mr, double sh_rate, int s_flag,int r_flag) /* shift and rotate */
+void sr_func(double*x, double*sr_x, int nx, double*Os,double*Mr, double sh_rate, int s_flag,int r_flag) /* shift and rotate */
 {
 	int i;
 	if (s_flag==1)
@@ -1230,8 +1228,7 @@ void sr_func (double *x, double *sr_x, int nx, double *Os,double *Mr, double sh_
 	}
 }
 
-void asyfunc (double *x, double *xasy, int nx, double beta)
-{
+void asyfunc(double*x, double*xasy, int nx, double beta){
 	int i;
     for (i=0; i<nx; i++)
     {
@@ -1240,8 +1237,7 @@ void asyfunc (double *x, double *xasy, int nx, double beta)
     }
 }
 
-void oszfunc (double *x, double *xosz, int nx)
-{
+void oszfunc(double*x, double*xosz, int nx){
 	int i,sx;
 	double c1,c2,xx;
     for (i=0; i<nx; i++)
@@ -1274,12 +1270,11 @@ void oszfunc (double *x, double *xosz, int nx)
 }
 
 
-void cf_cal(double *x, double *f, int nx, double *Os,double * delta,double * bias,double * fit, int cf_num)
-{
+void cf_cal(double*x, double*f, int nx, double*Os,double* delta,double* bias,double* fit, int cf_num){
 	int i,j;
-	double *w;
+	double*w;
 	double w_max=0,w_sum=0;
-	w=(double *)malloc(cf_num * sizeof(double));
+	w=(double*)malloc(cf_num * sizeof(double));
 	for (i=0; i<cf_num; i++)
 	{
 		fit[i]+=bias[i];

@@ -38,7 +38,7 @@ void cec14_test_func(double *, double *,int,int,int);
 class searchAlgorithm {
 public:
   virtual Fitness run() = 0;
-protected:
+public: // era protect
   void evaluatePopulation(const vector<Individual> &pop, vector<Fitness> &fitness);
   void initializeFitnessFunctionParameters();
 

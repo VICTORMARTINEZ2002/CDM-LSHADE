@@ -1,11 +1,4 @@
-/*
-  L-SHADE implemented by C++ for Special Session & Competition on Real-Parameter Single Objective Optimization at CEC-2014
-
-  Version: 1.1   Date: 9/Jun/2014
-  Written by Ryoji Tanabe (rt.ryoji.tanabe [at] gmail.com)
-*/
-
-#include"de.h"
+#include "de.h"
 
 Fitness LSHADE::run() {
   cout << scientific << setprecision(8);
