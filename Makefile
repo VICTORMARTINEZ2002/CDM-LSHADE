@@ -11,10 +11,13 @@ LDFLAGS = ./lib/libpyclustering.a -lm
 CFLAGS = -I./include -I./include/pyclustering
 
 $(TARGET): $(OBJS)
-	g++ -o $(TARGET) $(OBJS) $(OPTION) $(LDFLAGS)
+	mpicxx -o $(TARGET) $(OBJS) $(OPTION) $(LDFLAGS)
 
 %.o: %.cpp
-	g++ $(CFLAGS) -c $< -o $@
+	mpicxx $(CFLAGS) -c $< -o $@
+
+run:
+	mpirun -np $(n) ./$(TARGET)
 
 cls:
 	rm -rf src/*.o $(TARGET)

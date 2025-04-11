@@ -62,8 +62,7 @@ extern double*OShift,*M,*y,*z,*x_bound;
 extern int ini_flag,n_flag,func_flag,*SS;
 
 
-void cec14_test_func(double*x, double*f, int nx, int mx,int func_num)
-{
+void cec14_test_func(double*x, double*f, int nx, int mx,int func_num){
 	int cf_num=10,i,j;
 	if (ini_flag==1)
 	{
