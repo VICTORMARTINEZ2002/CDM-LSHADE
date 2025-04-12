@@ -14,15 +14,15 @@ DMLSHADE::DMLSHADE(int max_elite_size, int number_of_patterns, int mining_genera
     generation = 0;
 }
 
-Fitness DMLSHADE::run(){
+double DMLSHADE::run(){
     cout << scientific << setprecision(8);
     initializeParameters();
     setSHADEParameters();
 
-    vector<Individual> pop;
-    vector<Fitness> fitness(pop_size, 0);
-    vector<Individual> children;
-    vector<Fitness> children_fitness(pop_size, 0);
+    vector<double*> pop;
+    vector<double> fitness(pop_size, 0);
+    vector<double*> children;
+    vector<double> children_fitness(pop_size, 0);
 
     // initialize population
     for(int i = 0; i < pop_size; i++){
@@ -33,8 +33,8 @@ Fitness DMLSHADE::run(){
     // evaluate the initial population's fitness values
     evaluatePopulation(pop, fitness);
 
-    Individual bsf_solution = (variable *)malloc(sizeof(variable) * problem_size);
-    Fitness bsf_fitness;
+    double* bsf_solution = (variable *)malloc(sizeof(variable) * problem_size);
+    double bsf_fitness;
     int nfes = 0;
 
     if((fitness[0] - optimum) < epsilon)
@@ -67,7 +67,7 @@ Fitness DMLSHADE::run(){
     // for external archive
     int arc_ind_count = 0;
     int random_selected_arc_ind;
-    vector<Individual> archive;
+    vector<double*> archive;
     for(int i = 0; i < arc_size; i++)
         archive.push_back((variable *)malloc(sizeof(variable) * problem_size));
 
@@ -98,7 +98,7 @@ Fitness DMLSHADE::run(){
     int p_best_ind;
     int p_num = round(pop_size * p_best_rate);
     int *sorted_array = (int *)malloc(sizeof(int) * pop_size);
-    Fitness *temp_fit = (Fitness *)malloc(sizeof(Fitness) * pop_size);
+    double *temp_fit = (double *)malloc(sizeof(double) * pop_size);
 
     // for linear population size reduction
     int max_pop_size = pop_size;
@@ -307,7 +307,7 @@ Fitness DMLSHADE::run(){
     return bsf_fitness - optimum;
 }
 
-void DMLSHADE::operateCurrentToPBest1BinWithArchive(const vector<Individual> &pop, Individual child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<Individual> &archive, int &arc_ind_count){
+void DMLSHADE::operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<double*> &archive, int &arc_ind_count){
   int r1, r2;
   
   do {
@@ -345,11 +345,11 @@ void DMLSHADE::operateCurrentToPBest1BinWithArchive(const vector<Individual> &po
   modifySolutionWithParentMedium(child,  pop[target]);
 }
 
-void DMLSHADE::updateElite(const vector<Individual> &pop, vector<Fitness> &fitness, int* sorted_indexes){
+void DMLSHADE::updateElite(const vector<double*> &pop, vector<double> &fitness, int* sorted_indexes){
     for(size_t i = 0; i < pop.size(); i++){
         elite.push_back({ pop[sorted_indexes[i]], fitness[sorted_indexes[i]] });
     }
-    std::sort(elite.begin(), elite.end(), [](tuple<Individual, double> el1, tuple<Individual, double> el2){
+    std::sort(elite.begin(), elite.end(), [](tuple<double*, double> el1, tuple<double*, double> el2){
       return get<1>(el1) < get<1>(el2);
     });
     
@@ -394,7 +394,7 @@ vector<map<int, double>> DMLSHADE::minePatterns(){
     return patterns;
 }
 
-void DMLSHADE::reducePopulationWithSort(vector<Individual> &pop, vector<Fitness> &fitness){
+void DMLSHADE::reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness){
   int worst_ind;
 
   for(int i = 0; i < reduction_ind_num; i++){

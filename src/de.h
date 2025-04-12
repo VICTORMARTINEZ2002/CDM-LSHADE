@@ -19,8 +19,6 @@
 using namespace std;
 
 typedef  double variable;
-typedef variable *Individual;
-typedef  double Fitness;
 typedef map<int, double> pattern;
 
 extern int g_function_number;
@@ -37,15 +35,15 @@ void cec14_test_func(double *, double *,int,int,int);
 
 class searchAlgorithm {
 public:
-  virtual Fitness run() = 0;
+  virtual double run() = 0;
 public: // era protect
-  void evaluatePopulation(const vector<Individual> &pop, vector<Fitness> &fitness);
+  void evaluatePopulation(const vector<double*> &pop, vector<double> &fitness);
   void initializeFitnessFunctionParameters();
 
   void initializeParameters();
-  Individual makeNewIndividual();
-  void modifySolutionWithParentMedium(Individual child, Individual parent);
-  void setBestSolution(const vector<Individual> &pop, const vector<Fitness> &fitness, Individual &bsf_solution, Fitness &bsf_fitness);
+  double* makeNewIndividual();
+  void modifySolutionWithParentMedium(double* child, double* parent);
+  void setBestSolution(const vector<double*> &pop, const vector<double> &fitness, double* &bsf_solution, double &bsf_fitness);
 
   //Return random value with uniform distribution [0, 1)
   inline double randDouble() {
@@ -102,19 +100,19 @@ public: // era protect
   int problem_size;
   variable max_region;
   variable min_region;
-  Fitness optimum;
+  double optimum;
   // acceptable error value
-  Fitness epsilon;
+  double epsilon;
   unsigned int max_num_evaluations;
   int pop_size;
 };
 
 class LSHADE: public searchAlgorithm{
 public:
-  virtual Fitness run();
+  virtual double run();
   void setSHADEParameters();
-  void reducePopulationWithSort(vector<Individual> &pop, vector<Fitness> &fitness);
-  void operateCurrentToPBest1BinWithArchive(const vector<Individual> &pop, Individual child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<Individual> &archive, int &arc_ind_count);
+  void reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness);
+  void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<double*> &archive, int &arc_ind_count);
 
   int arc_size;
   double arc_rate;
@@ -127,12 +125,12 @@ class DMLSHADE: public searchAlgorithm {
 public:
   DMLSHADE(int max_elite_size, int number_of_patterns, int mining_generation_step);
 
-  virtual Fitness run();
+  virtual double run();
   void setSHADEParameters();
-  void reducePopulationWithSort(vector<Individual> &pop, vector<Fitness> &fitness);
-  void operateCurrentToPBest1BinWithArchive(const vector<Individual> &pop, Individual child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<Individual> &archive, int &arc_ind_count);
+  void reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness);
+  void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<double*> &archive, int &arc_ind_count);
 
-  void updateElite(const vector<Individual> &pop, vector<Fitness> &fitness, int* sorted_indexes);
+  void updateElite(const vector<double*> &pop, vector<double> &fitness, int* sorted_indexes);
   vector<map<int, double>> minePatterns();
   
   int arc_size;
@@ -146,7 +144,7 @@ public:
   int number_of_patterns;
   int mining_generation_step;
 
-  vector<tuple<Individual, double>> elite;
+  vector<tuple<double*, double>> elite;
 };
 
 #endif

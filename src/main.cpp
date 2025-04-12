@@ -47,9 +47,9 @@ int main(int argc, char **argv){
 		cout << "\n-------------------------------------------------------" << endl;
 		cout << "Function = " << g_function_number << ", Dimension size = " << g_problem_size << "\n" << endl;
 
-		Fitness *bsf_fitness_array = (Fitness*)malloc(sizeof(Fitness) * num_runs);
-		Fitness mean_bsf_fitness   = 0;
-		Fitness std_bsf_fitness    = 0;
+		double *bsf_fitness_array = (double*)malloc(sizeof(double) * num_runs);
+		double mean_bsf_fitness   = 0;
+		double std_bsf_fitness    = 0;
 
 		for(int j=0; j<num_runs; j++){ 
 			// searchAlgorithm *alg = new LSHADE();
@@ -61,10 +61,10 @@ int main(int argc, char **argv){
 			alg->initializeParameters();
 			alg->setSHADEParameters();
 
-			vector<Individual> pop;
-			vector<Fitness> fitness(alg->pop_size, 0);
-			vector<Individual> children;
-			vector<Fitness> children_fitness(alg->pop_size, 0);
+			vector<double*> pop;
+			vector<double> fitness(alg->pop_size, 0);
+			vector<double*> children;
+			vector<double> children_fitness(alg->pop_size, 0);
 
 			// initialize population
 			for(int i=0; i<alg->pop_size; i++){
@@ -75,8 +75,8 @@ int main(int argc, char **argv){
 			// evaluate the initial population's fitness values
 			alg->evaluatePopulation(pop, fitness);
 
-			Individual bsf_solution = (variable *)malloc(sizeof(variable) * alg->problem_size);
-			Fitness bsf_fitness;
+			double* bsf_solution = (variable *)malloc(sizeof(variable) * alg->problem_size);
+			double bsf_fitness;
 			int nfes = 0;
 
 			if((fitness[0] - alg->optimum) < alg->epsilon)
@@ -107,7 +107,7 @@ int main(int argc, char **argv){
 			// for external archive
 			int arc_ind_count = 0;
 			int random_selected_arc_ind;
-			vector<Individual> archive;
+			vector<double*> archive;
 			for(int i=0; i < alg->arc_size; i++)
 				archive.push_back((variable *)malloc(sizeof(variable) * alg->problem_size));
 
@@ -138,7 +138,7 @@ int main(int argc, char **argv){
 			int p_best_ind;
 			int p_num = round(alg->pop_size * alg->p_best_rate);
 			int *sorted_array = (int *)malloc(sizeof(int) * alg->pop_size);
-			Fitness *temp_fit = (Fitness *)malloc(sizeof(Fitness) * alg->pop_size);
+			double *temp_fit = (double *)malloc(sizeof(double) * alg->pop_size);
 
 			// for linear population size reduction
 			int max_pop_size = alg->pop_size;

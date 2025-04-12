@@ -8,7 +8,7 @@ void searchAlgorithm::initializeParameters(){
 	initializeFitnessFunctionParameters();
 }
 
-void searchAlgorithm::evaluatePopulation(const vector<Individual> &pop, vector<Fitness> &fitness){
+void searchAlgorithm::evaluatePopulation(const vector<double*> &pop, vector<double> &fitness){
 	for(int i=0; i<pop_size; i++){
 		cec14_test_func(pop[i],  &fitness[i], problem_size, 1, function_number);
 	}
@@ -24,7 +24,7 @@ void searchAlgorithm::initializeFitnessFunctionParameters(){
 }
 
 //set best solution (bsf_solution) and its fitness value (bsf_fitness) in the initial population
-void searchAlgorithm::setBestSolution(const vector<Individual> &pop, const vector<Fitness> &fitness, Individual &bsf_solution, Fitness &bsf_fitness){
+void searchAlgorithm::setBestSolution(const vector<double*> &pop, const vector<double> &fitness, double* &bsf_solution, double &bsf_fitness){
 	int current_best_individual = 0;
 
 	for(int i = 1; i<pop_size; i++){
@@ -40,8 +40,8 @@ void searchAlgorithm::setBestSolution(const vector<Individual> &pop, const vecto
 }
 
 // make new individual randomly
-Individual searchAlgorithm::makeNewIndividual(){
-	Individual individual = (variable*)malloc(sizeof(variable) * problem_size);
+double* searchAlgorithm::makeNewIndividual(){
+	double* individual = (variable*)malloc(sizeof(variable) * problem_size);
 
 	for(int i=0; i < problem_size; i++){
 		individual[i] = ((max_region - min_region) * randDouble()) + min_region;
@@ -56,7 +56,7 @@ Individual searchAlgorithm::makeNewIndividual(){
 	J. Zhang and A. C. Sanderson, "JADE: Adaptive differential evolution with optional external archive,"
 	IEEE Tran. Evol. Comput., vol. 13, no. 5, pp. 945–958, 2009.
  */
-void searchAlgorithm::modifySolutionWithParentMedium(Individual child, Individual parent){
+void searchAlgorithm::modifySolutionWithParentMedium(double* child, double* parent){
 	int l_problem_size = problem_size;
 	variable l_min_region = min_region;
 	variable l_max_region = max_region;
