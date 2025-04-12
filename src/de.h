@@ -18,7 +18,7 @@
 
 using namespace std;
 
-typedef  double variable;
+typedef  double double;
 typedef map<int, double> pattern;
 
 extern int g_function_number;
@@ -98,8 +98,8 @@ public: // era protect
   
   int function_number;
   int problem_size;
-  variable max_region;
-  variable min_region;
+  double max_region;
+  double min_region;
   double optimum;
   // acceptable error value
   double epsilon;
@@ -112,11 +112,11 @@ public:
   virtual double run();
   void setSHADEParameters();
   void reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness);
-  void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<double*> &archive, int &arc_ind_count);
+  void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, double &scaling_factor, double &cross_rate, const vector<double*> &archive, int &arc_ind_count);
 
   int arc_size;
   double arc_rate;
-  variable p_best_rate;
+  double p_best_rate;
   int memory_size;
   int reduction_ind_num;
 };
@@ -128,14 +128,14 @@ public:
   virtual double run();
   void setSHADEParameters();
   void reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness);
-  void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<double*> &archive, int &arc_ind_count);
+  void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, double &scaling_factor, double &cross_rate, const vector<double*> &archive, int &arc_ind_count);
 
   void updateElite(const vector<double*> &pop, vector<double> &fitness, int* sorted_indexes);
   vector<map<int, double>> minePatterns();
   
   int arc_size;
   double arc_rate;
-  variable p_best_rate;
+  double p_best_rate;
   int memory_size;
   int reduction_ind_num;
 

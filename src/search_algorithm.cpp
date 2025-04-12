@@ -41,7 +41,7 @@ void searchAlgorithm::setBestSolution(const vector<double*> &pop, const vector<d
 
 // make new individual randomly
 double* searchAlgorithm::makeNewIndividual(){
-	double* individual = (variable*)malloc(sizeof(variable) * problem_size);
+	double* individual = (double*)malloc(sizeof(double) * problem_size);
 
 	for(int i=0; i < problem_size; i++){
 		individual[i] = ((max_region - min_region) * randDouble()) + min_region;
@@ -58,8 +58,8 @@ double* searchAlgorithm::makeNewIndividual(){
  */
 void searchAlgorithm::modifySolutionWithParentMedium(double* child, double* parent){
 	int l_problem_size = problem_size;
-	variable l_min_region = min_region;
-	variable l_max_region = max_region;
+	double l_min_region = min_region;
+	double l_max_region = max_region;
 
 	for(int j = 0; j < l_problem_size; j++){
 		if (child[j] < l_min_region){

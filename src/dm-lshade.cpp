@@ -27,13 +27,13 @@ double DMLSHADE::run(){
     // initialize population
     for(int i = 0; i < pop_size; i++){
         pop.push_back(makeNewIndividual());
-        children.push_back((variable *)malloc(sizeof(variable) * problem_size));
+        children.push_back((double *)malloc(sizeof(double) * problem_size));
     }
 
     // evaluate the initial population's fitness values
     evaluatePopulation(pop, fitness);
 
-    double* bsf_solution = (variable *)malloc(sizeof(variable) * problem_size);
+    double* bsf_solution = (double *)malloc(sizeof(double) * problem_size);
     double bsf_fitness;
     int nfes = 0;
 
@@ -69,30 +69,30 @@ double DMLSHADE::run(){
     int random_selected_arc_ind;
     vector<double*> archive;
     for(int i = 0; i < arc_size; i++)
-        archive.push_back((variable *)malloc(sizeof(variable) * problem_size));
+        archive.push_back((double *)malloc(sizeof(double) * problem_size));
 
     int num_success_params;
-    vector<variable> success_sf;
-    vector<variable> success_cr;
-    vector<variable> dif_fitness;
+    vector<double> success_sf;
+    vector<double> success_cr;
+    vector<double> dif_fitness;
 
     // the contents of M_f and M_cr are all initialiezed 0.5
-    vector<variable> memory_sf(memory_size, 0.5);
-    vector<variable> memory_cr(memory_size, 0.5);
+    vector<double> memory_sf(memory_size, 0.5);
+    vector<double> memory_cr(memory_size, 0.5);
 
-    variable temp_sum_sf;
-    variable temp_sum_cr;
-    variable sum;
-    variable weight;
+    double temp_sum_sf;
+    double temp_sum_cr;
+    double sum;
+    double weight;
 
     // memory index counter
     int memory_pos = 0;
 
     // for new parameters sampling
-    variable mu_sf, mu_cr;
+    double mu_sf, mu_cr;
     int random_selected_period;
-    variable *pop_sf = (variable *)malloc(sizeof(variable) * pop_size);
-    variable *pop_cr = (variable *)malloc(sizeof(variable) * pop_size);
+    double *pop_sf = (double *)malloc(sizeof(double) * pop_size);
+    double *pop_cr = (double *)malloc(sizeof(double) * pop_size);
 
     // for current-to-pbest/1
     int p_best_ind;
@@ -307,7 +307,7 @@ double DMLSHADE::run(){
     return bsf_fitness - optimum;
 }
 
-void DMLSHADE::operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<double*> &archive, int &arc_ind_count){
+void DMLSHADE::operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, double &scaling_factor, double &cross_rate, const vector<double*> &archive, int &arc_ind_count){
   int r1, r2;
   
   do {
