@@ -109,7 +109,7 @@ public: // era protect
   int pop_size;
 };
 
-class LSHADE: public searchAlgorithm {
+class LSHADE: public searchAlgorithm{
 public:
   virtual Fitness run();
   void setSHADEParameters();

@@ -21,6 +21,7 @@ int main(int argc, char **argv){
 	g_max_num_evaluations = g_problem_size * 10000; //available number of fitness evaluations 
 
 	srand((unsigned)time(NULL));
+	cout << scientific << setprecision(8);
 
 	// Inicialização MPI
 	MPI_Status status;
@@ -47,8 +48,8 @@ int main(int argc, char **argv){
 		cout << "Function = " << g_function_number << ", Dimension size = " << g_problem_size << "\n" << endl;
 
 		Fitness *bsf_fitness_array = (Fitness*)malloc(sizeof(Fitness) * num_runs);
-		Fitness mean_bsf_fitness = 0;
-		Fitness std_bsf_fitness = 0;
+		Fitness mean_bsf_fitness   = 0;
+		Fitness std_bsf_fitness    = 0;
 
 		for(int j=0; j<num_runs; j++){ 
 			// searchAlgorithm *alg = new LSHADE();
@@ -57,7 +58,6 @@ int main(int argc, char **argv){
 			DMLSHADE *alg = new DMLSHADE(max_elite_size, number_of_patterns, mining_generation_step);
 
 			// Inicio do Run
-			cout << scientific << setprecision(8);
 			alg->initializeParameters();
 			alg->setSHADEParameters();
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv){
 			vector<Fitness> children_fitness(alg->pop_size, 0);
 
 			// initialize population
-			for(int i = 0; i < alg->pop_size; i++){
+			for(int i=0; i<alg->pop_size; i++){
 				pop.push_back(alg->makeNewIndividual());
 				children.push_back((variable *)malloc(sizeof(variable) * alg->problem_size));
 			}
@@ -82,18 +82,17 @@ int main(int argc, char **argv){
 			if((fitness[0] - alg->optimum) < alg->epsilon)
 				fitness[0] = alg->optimum;
 			bsf_fitness = fitness[0];
-			for(int j = 0; j < alg->problem_size; j++)
+			for(int j=0; j < alg->problem_size; j++)
 				bsf_solution[j] = pop[0][j];
 			/////////////////////////////////////////////////////////////////////////
-			for(int i = 0; i < alg->pop_size; i++){
+			for(int i=0; i < alg->pop_size; i++){
 				nfes++;
 
-				if((fitness[i] - alg->optimum) < alg->epsilon){fitness[i] = alg->optimum;}
+				if((fitness[i]-alg->optimum) < alg->epsilon){fitness[i] = alg->optimum;}
 
 				if(fitness[i] < bsf_fitness){
 					bsf_fitness = fitness[i];
-					for(int j = 0; j < alg->problem_size; j++)
-						bsf_solution[j] = pop[i][j];
+					for(int j=0; j < alg->problem_size; j++){bsf_solution[j] = pop[i][j];}
 				}
 
 				// if(nfes % 1000 == 0){
@@ -101,8 +100,7 @@ int main(int argc, char **argv){
 				//   cout << bsf_fitness - alg->optimum << endl;
 				// }
 
-				if(nfes >= alg->max_num_evaluations)
-					break;
+				if(nfes >= alg->max_num_evaluations){break;}
 			}
 			////////////////////////////////////////////////////////////////////////////
 
@@ -110,7 +108,7 @@ int main(int argc, char **argv){
 			int arc_ind_count = 0;
 			int random_selected_arc_ind;
 			vector<Individual> archive;
-			for(int i = 0; i < alg->arc_size; i++)
+			for(int i=0; i < alg->arc_size; i++)
 				archive.push_back((variable *)malloc(sizeof(variable) * alg->problem_size));
 
 			int num_success_params;
@@ -154,9 +152,9 @@ int main(int argc, char **argv){
 			// main loop
 			while(nfes < alg->max_num_evaluations){
 				alg->generation++;
-				for(int i = 0; i < alg->pop_size; i++)
+				for(int i=0; i < alg->pop_size; i++)
 					sorted_array[i] = i;
-				for(int i = 0; i < alg->pop_size; i++)
+				for(int i=0; i < alg->pop_size; i++)
 					temp_fit[i] = fitness[i];
 				alg->sortIndexWithQuickSort(&temp_fit[0], 0, alg->pop_size - 1, sorted_array);
 
@@ -213,7 +211,7 @@ int main(int argc, char **argv){
 				// update the bsf-solution and check the current number of fitness evaluations
 				//  if the current number of fitness evaluations over the max number of fitness evaluations, the search is terminated
 				//  So, this program is unconcerned about L-SHADE algorithm directly
-				for(int i = 0; i < alg->pop_size; i++){
+				for(int i=0; i < alg->pop_size; i++){
 					nfes++;
 
 					// following the rules of CEC 2014 real parameter competition,
@@ -223,7 +221,7 @@ int main(int argc, char **argv){
 
 					if(children_fitness[i] < bsf_fitness){
 						bsf_fitness = children_fitness[i];
-						for(int j = 0; j < alg->problem_size; j++){bsf_solution[j] = children[i][j];}
+						for(int j=0; j < alg->problem_size; j++){bsf_solution[j] = children[i][j];}
 					}
 
 					// if(nfes % 1000 == 0){
@@ -236,11 +234,11 @@ int main(int argc, char **argv){
 				////////////////////////////////////////////////////////////////////////////
 
 				// generation alternation
-				for(int i = 0; i < alg->pop_size; i++){
+				for(int i=0; i < alg->pop_size; i++){
 					if(children_fitness[i] == fitness[i])
 					{
 						fitness[i] = children_fitness[i];
-						for(int j = 0; j < alg->problem_size; j++)
+						for(int j=0; j < alg->problem_size; j++)
 							pop[i][j] = children[i][j];
 					}
 					else if(children_fitness[i] < fitness[i])
@@ -250,7 +248,7 @@ int main(int argc, char **argv){
 						{
 							if(arc_ind_count < alg->arc_size)
 							{
-								for(int j = 0; j < alg->problem_size; j++)
+								for(int j=0; j < alg->problem_size; j++)
 									archive[arc_ind_count][j] = pop[i][j];
 								arc_ind_count++;
 							}
@@ -258,14 +256,14 @@ int main(int argc, char **argv){
 							else
 							{
 								random_selected_arc_ind = rand() % alg->arc_size;
-								for(int j = 0; j < alg->problem_size; j++)
+								for(int j=0; j < alg->problem_size; j++)
 									archive[random_selected_arc_ind][j] = pop[i][j];
 							}
 						}
 
 						dif_fitness.push_back(fabs(fitness[i] - children_fitness[i]));
 						fitness[i] = children_fitness[i];
-						for(int j = 0; j < alg->problem_size; j++)
+						for(int j=0; j < alg->problem_size; j++)
 							pop[i][j] = children[i][j];
 
 						// successful parameters are preserved in S_F and S_CR
@@ -284,11 +282,11 @@ int main(int argc, char **argv){
 					temp_sum_cr = 0;
 					sum = 0;
 
-					for(int i = 0; i < num_success_params; i++)
+					for(int i=0; i < num_success_params; i++)
 						sum += dif_fitness[i];
 
 					// weighted lehmer mean
-					for(int i = 0; i < num_success_params; i++){
+					for(int i=0; i < num_success_params; i++){
 						weight = dif_fitness[i] / sum;
 
 						memory_sf[memory_pos] += weight * success_sf[i] * success_sf[i];
@@ -341,14 +339,10 @@ int main(int argc, char **argv){
 			// return bsf_fitness - alg->optimum;
 
 			bsf_fitness_array[j] = bsf_fitness - alg->optimum;
-
-
-
-
-
 			cout << j + 1 << "th run, " << "error value = " << bsf_fitness_array[j] << endl;
 		}
 
+		// Impressão dos Resultados
 		for(int j=0; j<num_runs; j++){mean_bsf_fitness += bsf_fitness_array[j];}
 		mean_bsf_fitness /= num_runs;
 
@@ -360,7 +354,7 @@ int main(int argc, char **argv){
 		free(bsf_fitness_array);
 	}
 
-	
+
 	MPI_Finalize();
 	return 0;
 }

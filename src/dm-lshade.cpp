@@ -310,7 +310,7 @@ Fitness DMLSHADE::run(){
 void DMLSHADE::operateCurrentToPBest1BinWithArchive(const vector<Individual> &pop, Individual child, int &target, int &p_best_individual, variable &scaling_factor, variable &cross_rate, const vector<Individual> &archive, int &arc_ind_count){
   int r1, r2;
   
-  do{
+  do {
     r1 = rand() % pop_size;
   } while (r1 == target);
   do {
@@ -368,12 +368,14 @@ vector<map<int, double>> DMLSHADE::minePatterns(){
     xmeans_data output_result;
     long seed = 1;
 
-    if(number_of_patterns>0){
+    if(number_of_patterns> 0)
+	{
 		output_result.clusters().clear();
 		random_center_initializer(number_of_patterns, seed).initialize(data, start_centers);
 		pyclustering::clst::kmeans solver(start_centers);
 		solver.process(data, output_result);
-	}else{
+	} 
+	else{
 		random_center_initializer(1, seed).initialize(data, start_centers);
 		xmeans solver(start_centers, elite.size(), 1e-4, splitting_type::BAYESIAN_INFORMATION_CRITERION, 1, seed);
 		solver.process(data, output_result);
