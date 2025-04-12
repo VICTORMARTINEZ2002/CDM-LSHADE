@@ -210,10 +210,8 @@ void cec14_test_func(double*x, double*f, int nx, int mx,int func_num){
 	}
 
 
-	for (i = 0; i < mx; i++)
-	{
-		switch(func_num)
-		{
+	for(i=0; i<mx; i++){
+		switch(func_num){
 		case 1:	
 			ellips_func(&x[i*nx],&f[i],nx,OShift,M,1,1);
 			f[i]+=100.0;

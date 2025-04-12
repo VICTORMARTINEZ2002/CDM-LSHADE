@@ -16,9 +16,9 @@ int    g_memory_size;
 double g_p_best_rate;
 
 int main(int argc, char **argv){
-	int num_runs = 51; //number of runs
+	int num_runs = 1; //number of runs
 	g_problem_size = 10; //dimension size. please select from 10, 30, 50, 100
-	g_max_num_evaluations = g_problem_size * 10000; //available number of fitness evaluations 
+	g_max_num_evaluations = (g_problem_size*10000); //available number of fitness evaluations 
 
 	srand((unsigned)time(NULL));
 	cout << scientific << setprecision(8);
@@ -32,7 +32,7 @@ int main(int argc, char **argv){
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	//L-SHADE parameters
-	g_pop_size    = (int)round(g_problem_size * 18);
+	g_pop_size    = (int)round(18*g_problem_size);
 	g_memory_size = 6;
 	g_arc_rate    = 2.6;
 	g_p_best_rate = 0.11;
@@ -42,8 +42,8 @@ int main(int argc, char **argv){
 	double       clusters_rate = 0.1468;
 	int mining_generation_step = 168;
 
-	for(int i=9; i<=9; i++){
-		g_function_number = i;//+1;
+	for(int func=9; func<=9; func++){
+		g_function_number = func;//+1;
 		cout << "\n-------------------------------------------------------" << endl;
 		cout << "Function = " << g_function_number << ", Dimension size = " << g_problem_size << "\n" << endl;
 
@@ -51,65 +51,60 @@ int main(int argc, char **argv){
 		double mean_bsf_fitness   = 0;
 		double std_bsf_fitness    = 0;
 
-		for(int j=0; j<num_runs; j++){ 
+		for(int curr_run=0; curr_run<num_runs; curr_run++){ 
 			// searchAlgorithm *alg = new LSHADE();
-			int max_elite_size = std::round(elite_rate * g_pop_size);
-			int number_of_patterns = std::round(clusters_rate * elite_rate);
-			DMLSHADE *alg = new DMLSHADE(max_elite_size, number_of_patterns, mining_generation_step);
+			int max_elite_size     = std::round(elite_rate * g_pop_size);
+			int number_of_patterns = std::round(elite_rate * g_pop_size); // [TODO - revisar]
+			DMLSHADE *alg          = new DMLSHADE(max_elite_size, number_of_patterns, mining_generation_step);
 
 			// Inicio do Run
 			alg->initializeParameters();
 			alg->setSHADEParameters();
+			int nfes = 0;
 
+			// Cria os vetores de Fitness
 			vector<double*> pop;
 			vector<double> fitness(alg->pop_size, 0);
 			vector<double*> children;
 			vector<double> children_fitness(alg->pop_size, 0);
 
-			// initialize population
+			// Inicializa População
 			for(int i=0; i<alg->pop_size; i++){
 				pop.push_back(alg->makeNewIndividual());
-				children.push_back((double *)malloc(sizeof(double) * alg->problem_size));
-			}
+				children.push_back((double*)malloc(alg->problem_size*sizeof(double)));
+			} alg->evaluatePopulation(pop, fitness); // Avalia Fitness População
 
-			// evaluate the initial population's fitness values
-			alg->evaluatePopulation(pop, fitness);
-
-			double* bsf_solution = (double *)malloc(sizeof(double) * alg->problem_size);
+			// BEST SOLUTION
+			double* bsf_solution = (double*)malloc(alg->problem_size*sizeof(double));
 			double bsf_fitness;
-			int nfes = 0;
 
-			if((fitness[0] - alg->optimum) < alg->epsilon)
-				fitness[0] = alg->optimum;
-			bsf_fitness = fitness[0];
-			for(int j=0; j < alg->problem_size; j++)
-				bsf_solution[j] = pop[0][j];
-			/////////////////////////////////////////////////////////////////////////
-			for(int i=0; i < alg->pop_size; i++){
-				nfes++;
+			// Encontra melhor solução na população [TODO - vai virar função]
+			bsf_fitness = ((fitness[0]-alg->optimum)<alg->epsilon) ? alg->optimum : fitness[0];
+			for(int i=0; i<alg->problem_size; i++){bsf_solution[i] = pop[0][i];}
 
-				if((fitness[i]-alg->optimum) < alg->epsilon){fitness[i] = alg->optimum;}
+			for(int i=0; i<alg->pop_size; i++){
+
+				if((fitness[i]-alg->optimum) < alg->epsilon){fitness[i]=alg->optimum;}
 
 				if(fitness[i] < bsf_fitness){
 					bsf_fitness = fitness[i];
-					for(int j=0; j < alg->problem_size; j++){bsf_solution[j] = pop[i][j];}
+					for(int j=0; j < alg->problem_size; j++){bsf_solution[j]=pop[i][j];}
 				}
 
-				// if(nfes % 1000 == 0){
-				//   //      cout << nfes << " " << bsf_fitness - alg->optimum << endl;
-				//   cout << bsf_fitness - alg->optimum << endl;
-				// }
-
-				if(nfes >= alg->max_num_evaluations){break;}
+				if((++nfes) >= alg->max_num_evaluations){break;}
 			}
 			////////////////////////////////////////////////////////////////////////////
 
+
 			// for external archive
-			int arc_ind_count = 0;
+			int arc_ind_count = 0;  // Contador Individuos do Arquivo
 			int random_selected_arc_ind;
+
+			// Crio Arquivo
 			vector<double*> archive;
-			for(int i=0; i < alg->arc_size; i++)
-				archive.push_back((double *)malloc(sizeof(double) * alg->problem_size));
+			for(int i=0; i < alg->arc_size; i++){
+				archive.push_back((double*)malloc(alg->problem_size*sizeof(double)));
+			}
 
 			int num_success_params;
 			vector<double> success_sf;
@@ -131,14 +126,14 @@ int main(int argc, char **argv){
 			// for new parameters sampling
 			double mu_sf, mu_cr;
 			int random_selected_period;
-			double *pop_sf = (double *)malloc(sizeof(double) * alg->pop_size);
-			double *pop_cr = (double *)malloc(sizeof(double) * alg->pop_size);
+			double *pop_sf = (double*)malloc(sizeof(double) * alg->pop_size);
+			double *pop_cr = (double*)malloc(sizeof(double) * alg->pop_size);
 
 			// for current-to-pbest/1
 			int p_best_ind;
 			int p_num = round(alg->pop_size * alg->p_best_rate);
-			int *sorted_array = (int *)malloc(sizeof(int) * alg->pop_size);
-			double *temp_fit = (double *)malloc(sizeof(double) * alg->pop_size);
+			int *sorted_array =    (int*)malloc(   sizeof(int)*alg->pop_size);
+			double *temp_fit  = (double*)malloc(sizeof(double)*alg->pop_size);
 
 			// for linear population size reduction
 			int max_pop_size = alg->pop_size;
@@ -146,17 +141,17 @@ int main(int argc, char **argv){
 			int plan_pop_size;
 
 			// Patterns set 
-			// I'm using a map because the pattern does not necessarily have the same number of variables that a solution
 			vector<map<int, double>> patterns;
 
 			// main loop
 			while(nfes < alg->max_num_evaluations){
 				alg->generation++;
-				for(int i=0; i < alg->pop_size; i++)
-					sorted_array[i] = i;
-				for(int i=0; i < alg->pop_size; i++)
-					temp_fit[i] = fitness[i];
-				alg->sortIndexWithQuickSort(&temp_fit[0], 0, alg->pop_size - 1, sorted_array);
+				for(int i=0; i<alg->pop_size; i++){sorted_array[i]=i;}
+				for(int i=0; i<alg->pop_size; i++){temp_fit[i]=fitness[i];}
+
+				// Sorted: sorted_array ordenado com a posição dos melhores individuos;
+				// [2,3,1,0] -> o indv da pos 2 é o melhor, 0 pior;
+				alg->sortIndexWithQuickSort(&temp_fit[0], 0, alg->pop_size-1, sorted_array);
 
 				// Mining steps
 				alg->updateElite(pop, fitness, sorted_array);
@@ -211,7 +206,7 @@ int main(int argc, char **argv){
 				// update the bsf-solution and check the current number of fitness evaluations
 				//  if the current number of fitness evaluations over the max number of fitness evaluations, the search is terminated
 				//  So, this program is unconcerned about L-SHADE algorithm directly
-				for(int i=0; i < alg->pop_size; i++){
+				for(int i=0; i<alg->pop_size; i++){
 					nfes++;
 
 					// following the rules of CEC 2014 real parameter competition,
@@ -234,7 +229,7 @@ int main(int argc, char **argv){
 				////////////////////////////////////////////////////////////////////////////
 
 				// generation alternation
-				for(int i=0; i < alg->pop_size; i++){
+				for(int i=0; i<alg->pop_size; i++){
 					if(children_fitness[i] == fitness[i])
 					{
 						fitness[i] = children_fitness[i];
@@ -336,10 +331,12 @@ int main(int argc, char **argv){
 				}
 			}
 
+			free(temp_fit);
+
 			// return bsf_fitness - alg->optimum;
 
-			bsf_fitness_array[j] = bsf_fitness - alg->optimum;
-			cout << j + 1 << "th run, " << "error value = " << bsf_fitness_array[j] << endl;
+			bsf_fitness_array[curr_run] = bsf_fitness - alg->optimum;
+			cout << curr_run + 1 << "th run, " << "error value = " << bsf_fitness_array[curr_run] << endl;
 		}
 
 		// Impressão dos Resultados

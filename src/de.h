@@ -1,8 +1,8 @@
 /*
-  L-SHADE implemented by C++ for Special Session & Competition on Real-Parameter Single Objective Optimization at CEC-2014
+	L-SHADE implemented by C++ for Special Session & Competition on Real-Parameter Single Objective Optimization at CEC-2014
 
-  Version: 1.1  Date: 9/Jun/2014
-  Written by Ryoji Tanabe (rt.ryoji.tanabe [at] gmail.com)
+	Version: 1.1  Date: 9/Jun/2014
+	Written by Ryoji Tanabe (rt.ryoji.tanabe [at] gmail.com)
 */
 
 #ifndef _HEADER_H_
@@ -18,7 +18,6 @@
 
 using namespace std;
 
-typedef  double double;
 typedef map<int, double> pattern;
 
 extern int g_function_number;
@@ -35,116 +34,116 @@ void cec14_test_func(double *, double *,int,int,int);
 
 class searchAlgorithm {
 public:
-  virtual double run() = 0;
+	virtual double run() = 0;
 public: // era protect
-  void evaluatePopulation(const vector<double*> &pop, vector<double> &fitness);
-  void initializeFitnessFunctionParameters();
+	void evaluatePopulation(const vector<double*> &pop, vector<double> &fitness);
+	void initializeFitnessFunctionParameters();
 
-  void initializeParameters();
-  double* makeNewIndividual();
-  void modifySolutionWithParentMedium(double* child, double* parent);
-  void setBestSolution(const vector<double*> &pop, const vector<double> &fitness, double* &bsf_solution, double &bsf_fitness);
+	void initializeParameters();
+	double* makeNewIndividual();
+	void modifySolutionWithParentMedium(double* child, double* parent);
+	void setBestSolution(const vector<double*> &pop, const vector<double> &fitness, double* &bsf_solution, double &bsf_fitness);
 
-  //Return random value with uniform distribution [0, 1)
-  inline double randDouble() {
-    return (double)rand() / (double) RAND_MAX;
-  }
+	//Return random value with uniform distribution [0, 1)
+	inline double randDouble() {
+		return (double)rand() / (double) RAND_MAX;
+	}
 
-  /*
-    Return random value from Cauchy distribution with mean "mu" and variance "gamma"
-    http://www.sat.t.u-tokyo.ac.jp/~omi/random_variables_generation.html#Cauchy
-  */
-  inline double cauchy_g(double mu, double gamma) {
-    return mu + gamma * tan(M_PI*(randDouble() - 0.5));
-  }
+	/*
+		Return random value from Cauchy distribution with mean "mu" and variance "gamma"
+		http://www.sat.t.u-tokyo.ac.jp/~omi/random_variables_generation.html#Cauchy
+	*/
+	inline double cauchy_g(double mu, double gamma) {
+		return mu + gamma * tan(M_PI*(randDouble() - 0.5));
+	}
 
-  /*
-    Return random value from normal distribution with mean "mu" and variance "gamma"
-    http://www.sat.t.u-tokyo.ac.jp/~omi/random_variables_generation.html#Gauss
-  */
-  inline double gauss(double mu, double sigma){
-    return mu + sigma * sqrt(-2.0 * log(randDouble())) * sin(2.0 * M_PI * randDouble());
-  }
+	/*
+		Return random value from normal distribution with mean "mu" and variance "gamma"
+		http://www.sat.t.u-tokyo.ac.jp/~omi/random_variables_generation.html#Gauss
+	*/
+	inline double gauss(double mu, double sigma){
+		return mu + sigma * sqrt(-2.0 * log(randDouble())) * sin(2.0 * M_PI * randDouble());
+	}
 
-  //Recursive quick sort with index array
-  template<class VarType>
-    void sortIndexWithQuickSort(VarType array[], int first, int last, int index[]) {
-    VarType x = array[(first + last) / 2];
-    int i = first;
-    int j = last;
-    VarType temp_var = 0;
-    int temp_num = 0;
+	//Recursive quick sort with index array
+	template<class VarType> // Generics
+		void sortIndexWithQuickSort(VarType array[], int first, int last, int index[]) {
+		VarType x = array[(first + last) / 2];
+		int i = first;
+		int j = last;
+		VarType temp_var = 0;
+		int temp_num = 0;
 
-    while (true) {
-      while (array[i] < x) i++;    
-      while (x < array[j]) j--;      
-      if (i >= j) break;
+		while(true){
+			while (array[i] < x) i++;    
+			while (x < array[j]) j--;      
+			if(i>=j){break;}
 
-      temp_var = array[i];
-      array[i] = array[j];
-      array[j] = temp_var;
+			temp_var = array[i];
+			array[i] = array[j];
+			array[j] = temp_var;
 
-      temp_num = index[i];
-      index[i] = index[j];
-      index[j] = temp_num;
+			temp_num = index[i];
+			index[i] = index[j];
+			index[j] = temp_num;
 
-      i++;
-      j--;
-    }
+			i++;
+			j--;
+		}
 
-    if (first < (i -1)) sortIndexWithQuickSort(array, first, i - 1, index);  
-    if ((j + 1) < last) sortIndexWithQuickSort(array, j + 1, last, index);    
-  }
-  
-  int function_number;
-  int problem_size;
-  double max_region;
-  double min_region;
-  double optimum;
-  // acceptable error value
-  double epsilon;
-  unsigned int max_num_evaluations;
-  int pop_size;
+		if(first < (i -1)){sortIndexWithQuickSort(array, first, i - 1, index);} 
+		if((j + 1) < last){sortIndexWithQuickSort(array, j + 1, last, index);}    
+	}
+	
+	int function_number;
+	int problem_size;
+	double max_region;
+	double min_region;
+	double optimum;
+	// acceptable error value
+	double epsilon;
+	unsigned int max_num_evaluations;
+	int pop_size;
 };
 
 class LSHADE: public searchAlgorithm{
 public:
-  virtual double run();
-  void setSHADEParameters();
-  void reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness);
-  void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, double &scaling_factor, double &cross_rate, const vector<double*> &archive, int &arc_ind_count);
+	virtual double run();
+	void setSHADEParameters();
+	void reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness);
+	void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, double &scaling_factor, double &cross_rate, const vector<double*> &archive, int &arc_ind_count);
 
-  int arc_size;
-  double arc_rate;
-  double p_best_rate;
-  int memory_size;
-  int reduction_ind_num;
+	int arc_size;
+	double arc_rate;
+	double p_best_rate;
+	int memory_size;
+	int reduction_ind_num;
 };
 
 class DMLSHADE: public searchAlgorithm {
 public:
-  DMLSHADE(int max_elite_size, int number_of_patterns, int mining_generation_step);
+	DMLSHADE(int max_elite_size, int number_of_patterns, int mining_generation_step);
 
-  virtual double run();
-  void setSHADEParameters();
-  void reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness);
-  void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, double &scaling_factor, double &cross_rate, const vector<double*> &archive, int &arc_ind_count);
+	virtual double run();
+	void setSHADEParameters();
+	void reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness);
+	void operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, double &scaling_factor, double &cross_rate, const vector<double*> &archive, int &arc_ind_count);
 
-  void updateElite(const vector<double*> &pop, vector<double> &fitness, int* sorted_indexes);
-  vector<map<int, double>> minePatterns();
-  
-  int arc_size;
-  double arc_rate;
-  double p_best_rate;
-  int memory_size;
-  int reduction_ind_num;
+	void updateElite(const vector<double*> &pop, vector<double> &fitness, int* sorted_indexes);
+	vector<map<int, double>> minePatterns();
+	
+	int arc_size;
+	double arc_rate;
+	double p_best_rate;
+	int memory_size;
+	int reduction_ind_num;
 
-  int generation;
-  int max_elite_size;
-  int number_of_patterns;
-  int mining_generation_step;
+	int generation;
+	int max_elite_size;
+	int number_of_patterns;
+	int mining_generation_step;
 
-  vector<tuple<double*, double>> elite;
+	vector<tuple<double*, double>> elite;
 };
 
 #endif
