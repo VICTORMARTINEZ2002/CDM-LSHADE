@@ -17,7 +17,10 @@ $(TARGET): $(OBJS)
 	mpicxx $(CFLAGS) -c $< -o $@
 
 run:
+	rm -rf src/*.o $(TARGET)
+	$(MAKE)
 	mpirun -np $(n) ./$(TARGET)
+
 
 cls:
 	rm -rf src/*.o $(TARGET)
