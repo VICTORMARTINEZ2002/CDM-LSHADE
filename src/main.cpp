@@ -32,6 +32,28 @@ bool stop(vector<bool> vet){
 	return flag;
 }
 
+void printVet(vector<double*> vet, int maxvar, bool flag){
+	cout << "{";
+	for(int i=0; i<vet.size(); i++){
+		cout << (i == 0 ? "" : " ") << "{";
+		for(int j=0; j<g_problem_size; j++){
+			printf("%5.1lf%s",vet[i][j], (j<g_problem_size-1 ? ", " : ""));
+		}
+		cout << "}" << (i<vet.size()-1? "\n":"");
+	}   cout << "}" << (flag?"M":"E") << endl;
+}
+
+void printVetMat(vector<double> vet, int col, bool flag){
+	cout << "{";
+	for(int i=0; i<(vet.size()/col); i++){
+		cout << (i == 0 ? "" : " ") << "{";
+		for(int j=0; j<col; j++){
+			printf("%5.1lf%s",vet[i*col+j], (j<g_problem_size-1 ? ", " : ""));
+		}
+		cout << "}" << (i<vet.size()-1? "\n":"");
+	}   cout << "}" << (flag?"M":"E") << endl;
+}
+
 int main(int argc, char **argv){
 	srand((unsigned)time(NULL));
 	cout << setprecision(8);
@@ -60,6 +82,8 @@ int main(int argc, char **argv){
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+
+
 	//L-SHADE parameters
 	g_pop_size    = (int)round(g_fator_pop_size*g_problem_size);
 	g_memory_size = 6;
@@ -71,22 +95,47 @@ int main(int argc, char **argv){
 	double       clusters_rate = 0.1468;
 	int mining_generation_step = 168;
 
-
-
 	int max_elite_size     = std::round(elite_rate * g_pop_size);
 	int number_of_patterns = std::round(elite_rate * g_pop_size); // [TODO - revisar]
 
+	// MPI Parametros
+	int mat_elite_size = max_elite_size*g_problem_size;
+	vector<double> tempElite(mat_elite_size);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	if(rank==0){ // Mestre
-		printf("Olá Mundo - rank %d size %d", rank, size);
+		printf("Olá Mundo - rank %d size %d\n", rank, size);
 
 		vector<bool> statusEscravos(size-1, false);
 		int popSize   = g_pop_size;
 		int eliteSize = max_elite_size;
 		vector<double*> pop;
-		vector<double*> tempElite(eliteSize);
 
-		int cont=0;
-		while(!stop(statusEscravos) && (cont<1000)){
+		int fflag = true;
+		while(!stop(statusEscravos)){
 
 			MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
 			if(flagMensagem){
@@ -94,6 +143,7 @@ int main(int argc, char **argv){
 					MPI_Get_count(&status, MPI_DOUBLE, &eliteSize);
 					MPI_Recv(&tempElite[0], eliteSize, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_LSHADE, MPI_COMM_WORLD, &status);
 					printf("[MESTRE] Recebi Elite de %d\n", status.MPI_SOURCE);
+					if(fflag){printVetMat(tempElite, g_problem_size, true);fflag=false;}
 
 				}else if(status.MPI_TAG==TAG_FINALZ){
 					MPI_Recv(NULL, 0, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_FINALZ, MPI_COMM_WORLD, &status);
@@ -101,9 +151,29 @@ int main(int argc, char **argv){
 					printf("[MESTRE] Recebi FIM de %d\n", status.MPI_SOURCE);
 				}
 			}
-			//cont++;
 		} printf("Mestre Terminou\n");
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	if(rank>=1){
 
@@ -149,74 +219,84 @@ int main(int argc, char **argv){
 		}
 
 
-		// MPI Testes
-		vector<double*> auxVet(g_problem_size);
-		MPI_Send(&auxVet[0], g_problem_size, MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD); 
-		printf("Enviei Elite!\n");
-		MPI_Send(NULL, 0, MPI_DOUBLE, RANK_MESTRE, TAG_FINALZ, MPI_COMM_WORLD);
-		printf("Enviei Mensagem Finalização!\n");	
-		// ////////////////////////////////////////////////////////////////////////////
+	// LSHADE PARAMETROS
 
 
-		// // for external archive
-		// int arc_ind_count = 0;  // Contador Individuos do Arquivo
-		// int random_selected_arc_ind;
+		// for external archive
+		int arc_ind_count = 0;  // Contador Individuos do Arquivo
+		int random_selected_arc_ind;
 
-		// // Crio Arquivo
-		// vector<double*> archive;
-		// for(int i=0; i < alg->arc_size; i++){
-		// 	archive.push_back((double*)malloc(alg->problem_size*sizeof(double)));
-		// }
+		// Crio Arquivo
+		vector<double*> archive;
+		for(int i=0; i < alg->arc_size; i++){
+			archive.push_back((double*)malloc(alg->problem_size*sizeof(double)));
+		}
 
-		// int num_success_params;
-		// vector<double> success_sf;
-		// vector<double> success_cr;
-		// vector<double> dif_fitness;
+		int num_success_params;
+		vector<double> success_sf;
+		vector<double> success_cr;
+		vector<double> dif_fitness;
 
-		// // the contents of M_f and M_cr are all initialiezed 0.5
-		// vector<double> memory_sf(alg->memory_size, 0.5);
-		// vector<double> memory_cr(alg->memory_size, 0.5);
+		// the contents of M_f and M_cr are all initialiezed 0.5
+		vector<double> memory_sf(alg->memory_size, 0.5);
+		vector<double> memory_cr(alg->memory_size, 0.5);
 
-		// double temp_sum_sf;
-		// double temp_sum_cr;
-		// double sum;
-		// double weight;
+		double temp_sum_sf;
+		double temp_sum_cr;
+		double sum;
+		double weight;
 
-		// // memory index counter
-		// int memory_pos = 0;
+		// memory index counter
+		int memory_pos = 0;
 
-		// // for new parameters sampling
-		// double mu_sf, mu_cr;
-		// int random_selected_period;
-		// double *pop_sf = (double*)malloc(sizeof(double) * alg->pop_size);
-		// double *pop_cr = (double*)malloc(sizeof(double) * alg->pop_size);
+		// for new parameters sampling
+		double mu_sf, mu_cr;
+		int random_selected_period;
+		double *pop_sf = (double*)malloc(sizeof(double) * alg->pop_size);
+		double *pop_cr = (double*)malloc(sizeof(double) * alg->pop_size);
 
-		// // for current-to-pbest/1
-		// int p_best_ind;
-		// int p_num = round(alg->pop_size * alg->p_best_rate);
-		// int *sorted_array =    (int*)malloc(   sizeof(int)*alg->pop_size);
-		// double *temp_fit  = (double*)malloc(sizeof(double)*alg->pop_size);
+		// for current-to-pbest/1
+		int p_best_ind;
+		int p_num = round(alg->pop_size * alg->p_best_rate);
+		int *sorted_array =    (int*)malloc(   sizeof(int)*alg->pop_size);
+		double *temp_fit  = (double*)malloc(sizeof(double)*alg->pop_size);
 
-		// // for linear population size reduction
-		// int max_pop_size = alg->pop_size;
-		// int min_pop_size = 4;
-		// int plan_pop_size;
+		// for linear population size reduction
+		int max_pop_size = alg->pop_size;
+		int min_pop_size = 4;
+		int plan_pop_size;
 
-		// // Patterns set 
-		// vector<map<int, double>> patterns;
+		// Patterns set 
+		vector<map<int, double>> patterns;
 
-		// // MAIN LOOP
+	// MAIN LOOP
 		// while(nfes < alg->max_num_evaluations){
-		// 	alg->generation++;
-		// 	for(int i=0; i<alg->pop_size; i++){sorted_array[i]=i;}
-		// 	for(int i=0; i<alg->pop_size; i++){temp_fit[i]=fitness[i];}
+			alg->generation++;
+			for(int i=0; i<alg->pop_size; i++){sorted_array[i]=i;}
+			for(int i=0; i<alg->pop_size; i++){temp_fit[i]=fitness[i];}
 
-		// 	// Sorted: sorted_array ordenado com a posição dos melhores individuos;
-		// 	// [2,3,1,0] -> o indv da pos 2 é o melhor, 0 pior;
-		// 	alg->sortIndexWithQuickSort(&temp_fit[0], 0, alg->pop_size-1, sorted_array);
+			// Sorted: sorted_array ordenado com a posição dos melhores individuos;
+			alg->sortIndexWithQuickSort(&temp_fit[0], 0, alg->pop_size-1, sorted_array);
 
-		// 	// Mining steps
-		// 	alg->updateElite(pop, fitness, sorted_array);
+			// Mining steps
+			alg->updateElite(pop, fitness, sorted_array);
+			
+			tempElite.clear();
+			for(int i=0; i<alg->elite.size(); i++){
+				for(int j=0; j<g_problem_size; j++){
+					tempElite.push_back(get<0>(alg->elite[i])[j]);
+				}	
+			} 
+
+			printVetMat(tempElite, g_problem_size, false);
+
+			// MPI Testes
+			MPI_Send(&tempElite[0], mat_elite_size, MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD); 
+			printf("Enviei Elite!\n");
+			MPI_Send(NULL, 0, MPI_DOUBLE, RANK_MESTRE, TAG_FINALZ, MPI_COMM_WORLD);
+			printf("Enviei Mensagem Finalização!\n");	
+
+	// AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 		// 	if(alg->generation % mining_generation_step == 0){
 		// 		patterns = alg->minePatterns(); // [TODO - Abrir pro mestre]
 

@@ -122,15 +122,15 @@ double DMLSHADE::run(){
 		// Mining steps
 		updateElite(pop, fitness, sorted_array);
 		if(generation % mining_generation_step == 0){
-		  patterns = minePatterns();
+			patterns = minePatterns();
 
-		  int mpi = min((int)patterns.size(), pop_size); // max patterns insertions
-		  for(size_t i = 0; i < mpi; i++){
+			int mpi = min((int)patterns.size(), pop_size); // max patterns insertions
+			for(size_t i = 0; i < mpi; i++){
 			int idx = sorted_array[pop_size - 1 - i];
 			for(size_t j = 0; j < problem_size; j++){
 				pop[idx][j] = patterns[i][j];
 			}
-		  }
+			}
 		}
 
 		for(int target = 0; target < pop_size; target++){
@@ -308,41 +308,41 @@ double DMLSHADE::run(){
 }
 
 void DMLSHADE::operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, double* child, int &target, int &p_best_individual, double &scaling_factor, double &cross_rate, const vector<double*> &archive, int &arc_ind_count){
-  int r1, r2;
-  
-  do {
+	int r1, r2;
+	
+	do {
 	r1 = rand() % pop_size;
-  } while (r1 == target);
-  do {
+	} while (r1 == target);
+	do {
 	r2 = rand() % (pop_size + arc_ind_count);
-  } while ((r2 == target) || (r2 == r1));
+	} while ((r2 == target) || (r2 == r1));
 
-  int random_variable = rand() % problem_size;
-  
-  if(r2 >= pop_size){
+	int random_variable = rand() % problem_size;
+	
+	if(r2 >= pop_size){
 	r2 -= pop_size;
 	for(int i = 0; i < problem_size; i++){
-	  if((randDouble() < cross_rate) || (i == random_variable)){
+		if((randDouble() < cross_rate) || (i == random_variable)){
 	child[i] = pop[target][i] + scaling_factor * (pop[p_best_individual][i] - pop[target][i]) + scaling_factor * (pop[r1][i] - archive[r2][i]);
-	  }
-	  else {
+		}
+		else {
 	child[i] = pop[target][i];
-	  }
+		}
 	}
-  }
-  else {
+	}
+	else {
 	for(int i = 0; i < problem_size; i++){
-	  if((randDouble() < cross_rate) || (i == random_variable)){
+		if((randDouble() < cross_rate) || (i == random_variable)){
 	child[i] = pop[target][i] + scaling_factor * (pop[p_best_individual][i] - pop[target][i]) + scaling_factor * (pop[r1][i] - pop[r2][i]);
-	  }
-	  else {
+		}
+		else {
 	child[i] = pop[target][i];
-	  }
+		}
 	}
-  }
+	}
 
-  //If the mutant vector violates bounds, the bound handling method is applied
-  modifySolutionWithParentMedium(child,  pop[target]);
+	//If the mutant vector violates bounds, the bound handling method is applied
+	modifySolutionWithParentMedium(child,  pop[target]);
 }
 
 void DMLSHADE::updateElite(const vector<double*> &pop, vector<double> &fitness, int* sorted_indexes){
@@ -354,6 +354,12 @@ void DMLSHADE::updateElite(const vector<double*> &pop, vector<double> &fitness, 
 	for(size_t i=0; i<pop.size(); i++){elite.push_back({pop[sorted_indexes[i]], fitness[sorted_indexes[i]]});}
 	std::sort(elite.begin(), elite.end(), [](tuple<double*, double> el1, tuple<double*, double> el2){return get<1>(el1) < get<1>(el2);});
 	if(elite.size()>max_elite_size){elite.erase(elite.begin() + max_elite_size, elite.end());}
+	
+
+
+	if(get<1>(elite[0])==get<1>(elite[1])){printf("RAPHAEL DO CEU 0==1\n");}
+	if(get<1>(elite[1])==get<1>(elite[2])){printf("RAPHAEL DO CEU 1==2\n");}
+	if(get<1>(elite[5])==get<1>(elite[9])){printf("RAPHAEL DO CEU 5==9\n");}
 }
 
 
@@ -367,14 +373,12 @@ vector<map<int, double>> DMLSHADE::minePatterns(){
 	xmeans_data output_result;
 	long seed = 1;
 
-	if(number_of_patterns> 0)
-	{
+	if(number_of_patterns> 0){
 		output_result.clusters().clear();
 		random_center_initializer(number_of_patterns, seed).initialize(data, start_centers);
 		pyclustering::clst::kmeans solver(start_centers);
 		solver.process(data, output_result);
-	} 
-	else{
+	}else{
 		random_center_initializer(1, seed).initialize(data, start_centers);
 		xmeans solver(start_centers, elite.size(), 1e-4, splitting_type::BAYESIAN_INFORMATION_CRITERION, 1, seed);
 		solver.process(data, output_result);
@@ -394,23 +398,23 @@ vector<map<int, double>> DMLSHADE::minePatterns(){
 }
 
 void DMLSHADE::reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness){
-  int worst_ind;
+	int worst_ind;
 
-  for(int i = 0; i < reduction_ind_num; i++){
-	worst_ind = 0;
-	for(int j = 1; j < pop_size; j++){
-	  if(fitness[j] > fitness[worst_ind]) worst_ind = j;
+	for(int i = 0; i < reduction_ind_num; i++){
+		worst_ind = 0;
+		for(int j = 1; j < pop_size; j++){
+			if(fitness[j] > fitness[worst_ind]) worst_ind = j;
+		}
+
+		pop.erase(pop.begin() + worst_ind);
+		fitness.erase(fitness.begin() + worst_ind);
+		pop_size--;
 	}
-
-	pop.erase(pop.begin() + worst_ind);
-	fitness.erase(fitness.begin() + worst_ind);
-	pop_size--;
-  }
 }
 
-void  DMLSHADE::setSHADEParameters(){
-  arc_rate = g_arc_rate;
-  arc_size = (int)round(pop_size * arc_rate);
-  p_best_rate = g_p_best_rate;
-  memory_size = g_memory_size;
+void DMLSHADE::setSHADEParameters(){
+	arc_rate = g_arc_rate;
+	arc_size = (int)round(pop_size * arc_rate);
+	p_best_rate = g_p_best_rate;
+	memory_size = g_memory_size;
 }
