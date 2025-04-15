@@ -25,7 +25,7 @@ double DMLSHADE::run(){
 	vector<double> children_fitness(pop_size, 0);
 
 	// initialize population
-	for(int i = 0; i < pop_size; i++){
+	for(int i=0; i<pop_size; i++){
 		pop.push_back(makeNewIndividual());
 		children.push_back((double *)malloc(sizeof(double) * problem_size));
 	}
@@ -37,20 +37,19 @@ double DMLSHADE::run(){
 	double bsf_fitness;
 	int nfes = 0;
 
-	if((fitness[0] - optimum) < epsilon)
-		fitness[0] = optimum;
+	if((fitness[0] - optimum) < epsilon){fitness[0] = optimum;}
 	bsf_fitness = fitness[0];
-	for(int j = 0; j < problem_size; j++)
+	for(int j=0; j<problem_size; j++)
 		bsf_solution[j] = pop[0][j];
 	/////////////////////////////////////////////////////////////////////////
-	for(int i = 0; i < pop_size; i++){
+	for(int i=0; i<pop_size; i++){
 		nfes++;
 
 		if((fitness[i] - optimum) < epsilon){fitness[i] = optimum;}
 
 		if(fitness[i] < bsf_fitness){
 			bsf_fitness = fitness[i];
-			for(int j = 0; j < problem_size; j++)
+			for(int j=0; j<problem_size; j++)
 				bsf_solution[j] = pop[i][j];
 		}
 
@@ -68,7 +67,7 @@ double DMLSHADE::run(){
 	int arc_ind_count = 0;
 	int random_selected_arc_ind;
 	vector<double*> archive;
-	for(int i = 0; i < arc_size; i++)
+	for(int i=0; i<arc_size; i++)
 		archive.push_back((double *)malloc(sizeof(double) * problem_size));
 
 	int num_success_params;
@@ -113,9 +112,9 @@ double DMLSHADE::run(){
 	// main loop
 	while(nfes < max_num_evaluations){
 		generation++;
-		for(int i = 0; i < pop_size; i++)
+		for(int i=0; i<pop_size; i++)
 			sorted_array[i] = i;
-		for(int i = 0; i < pop_size; i++)
+		for(int i=0; i<pop_size; i++)
 			temp_fit[i] = fitness[i];
 		sortIndexWithQuickSort(&temp_fit[0], 0, pop_size - 1, sorted_array);
 
@@ -125,9 +124,9 @@ double DMLSHADE::run(){
 			patterns = minePatterns();
 
 			int mpi = min((int)patterns.size(), pop_size); // max patterns insertions
-			for(size_t i = 0; i < mpi; i++){
+			for(size_t i=0; i<mpi; i++){
 			int idx = sorted_array[pop_size - 1 - i];
-			for(size_t j = 0; j < problem_size; j++){
+			for(size_t j=0; j<problem_size; j++){
 				pop[idx][j] = patterns[i][j];
 			}
 			}
@@ -175,7 +174,7 @@ double DMLSHADE::run(){
 		// update the bsf-solution and check the current number of fitness evaluations
 		//  if the current number of fitness evaluations over the max number of fitness evaluations, the search is terminated
 		//  So, this program is unconcerned about L-SHADE algorithm directly
-		for(int i = 0; i < pop_size; i++){
+		for(int i=0; i<pop_size; i++){
 			nfes++;
 
 			// following the rules of CEC 2014 real parameter competition,
@@ -187,7 +186,7 @@ double DMLSHADE::run(){
 			if(children_fitness[i] < bsf_fitness)
 			{
 				bsf_fitness = children_fitness[i];
-				for(int j = 0; j < problem_size; j++)
+				for(int j=0; j<problem_size; j++)
 					bsf_solution[j] = children[i][j];
 			}
 
@@ -201,11 +200,11 @@ double DMLSHADE::run(){
 		////////////////////////////////////////////////////////////////////////////
 
 		// generation alternation
-		for(int i = 0; i < pop_size; i++){
+		for(int i=0; i<pop_size; i++){
 			if(children_fitness[i] == fitness[i])
 			{
 				fitness[i] = children_fitness[i];
-				for(int j = 0; j < problem_size; j++)
+				for(int j=0; j<problem_size; j++)
 					pop[i][j] = children[i][j];
 			}
 			else if(children_fitness[i] < fitness[i])
@@ -215,7 +214,7 @@ double DMLSHADE::run(){
 				{
 					if(arc_ind_count < arc_size)
 					{
-						for(int j = 0; j < problem_size; j++)
+						for(int j=0; j<problem_size; j++)
 							archive[arc_ind_count][j] = pop[i][j];
 						arc_ind_count++;
 					}
@@ -223,14 +222,14 @@ double DMLSHADE::run(){
 					else
 					{
 						random_selected_arc_ind = rand() % arc_size;
-						for(int j = 0; j < problem_size; j++)
+						for(int j=0; j<problem_size; j++)
 							archive[random_selected_arc_ind][j] = pop[i][j];
 					}
 				}
 
 				dif_fitness.push_back(fabs(fitness[i] - children_fitness[i]));
 				fitness[i] = children_fitness[i];
-				for(int j = 0; j < problem_size; j++)
+				for(int j=0; j<problem_size; j++)
 					pop[i][j] = children[i][j];
 
 				// successful parameters are preserved in S_F and S_CR
@@ -249,11 +248,11 @@ double DMLSHADE::run(){
 			temp_sum_cr = 0;
 			sum = 0;
 
-			for(int i = 0; i < num_success_params; i++)
+			for(int i=0; i<num_success_params; i++)
 				sum += dif_fitness[i];
 
 			// weighted lehmer mean
-			for(int i = 0; i < num_success_params; i++)
+			for(int i=0; i<num_success_params; i++)
 			{
 				weight = dif_fitness[i] / sum;
 
@@ -321,7 +320,7 @@ void DMLSHADE::operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, 
 	
 	if(r2 >= pop_size){
 	r2 -= pop_size;
-	for(int i = 0; i < problem_size; i++){
+	for(int i=0; i<problem_size; i++){
 		if((randDouble() < cross_rate) || (i == random_variable)){
 	child[i] = pop[target][i] + scaling_factor * (pop[p_best_individual][i] - pop[target][i]) + scaling_factor * (pop[r1][i] - archive[r2][i]);
 		}
@@ -331,7 +330,7 @@ void DMLSHADE::operateCurrentToPBest1BinWithArchive(const vector<double*> &pop, 
 	}
 	}
 	else {
-	for(int i = 0; i < problem_size; i++){
+	for(int i=0; i<problem_size; i++){
 		if((randDouble() < cross_rate) || (i == random_variable)){
 	child[i] = pop[target][i] + scaling_factor * (pop[p_best_individual][i] - pop[target][i]) + scaling_factor * (pop[r1][i] - pop[r2][i]);
 		}
@@ -356,16 +355,16 @@ void DMLSHADE::updateElite(const vector<double*> &pop, vector<double> &fitness, 
 	if(elite.size()>max_elite_size){elite.erase(elite.begin() + max_elite_size, elite.end());}
 	
 
-
-	if(get<1>(elite[0])==get<1>(elite[1])){printf("RAPHAEL DO CEU 0==1\n");}
-	if(get<1>(elite[1])==get<1>(elite[2])){printf("RAPHAEL DO CEU 1==2\n");}
-	if(get<1>(elite[5])==get<1>(elite[9])){printf("RAPHAEL DO CEU 5==9\n");}
+	// [TODO - Elementos Repetidos na ELITE!!!]
+	// if(get<1>(elite[0])==get<1>(elite[1])){printf("RAPHAEL DO CEU 0==1\n");}
+	// if(get<1>(elite[1])==get<1>(elite[2])){printf("RAPHAEL DO CEU 1==2\n");}
+	// if(get<1>(elite[5])==get<1>(elite[9])){printf("RAPHAEL DO CEU 5==9\n");}
 }
 
 
 vector<map<int, double>> DMLSHADE::minePatterns(){
 	vector<vector<double>> data;
-	for(size_t i = 0; i < elite.size(); i++){
+	for(size_t i=0; i<elite.size(); i++){
 		data.push_back(vector<double>(get<0>(elite[i]), get<0>(elite[i]) + problem_size));
 	}
 
@@ -388,7 +387,7 @@ vector<map<int, double>> DMLSHADE::minePatterns(){
 	vector<map<int, double>> patterns;
 	auto centers = output_result.centers();
 	for(auto center:centers){
-		for(size_t j = 0; j < problem_size; j++){	
+		for(size_t j=0; j<problem_size; j++){	
 			_pattern.insert(pair<int, double>(j, center[j]));
 		}
 		patterns.push_back(_pattern);
@@ -400,9 +399,9 @@ vector<map<int, double>> DMLSHADE::minePatterns(){
 void DMLSHADE::reducePopulationWithSort(vector<double*> &pop, vector<double> &fitness){
 	int worst_ind;
 
-	for(int i = 0; i < reduction_ind_num; i++){
+	for(int i=0; i<reduction_ind_num; i++){
 		worst_ind = 0;
-		for(int j = 1; j < pop_size; j++){
+		for(int j=1; j<pop_size; j++){
 			if(fitness[j] > fitness[worst_ind]) worst_ind = j;
 		}
 
