@@ -127,23 +127,26 @@ int main(int argc, char **argv){
 					int recvSize;
 					MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
 					MPI_Recv(&tempElite[0], recvSize, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_LSHADE, MPI_COMM_WORLD, &status);
-					// if(debugFlag){printVetMat(tempElite, g_problem_size+1, true);}
+					printf("ELITE RECEBIDA: %d\n", (recvSize/(g_problem_size+1)));
+					//if(debugFlag){printVetMat(tempElite, g_problem_size+1, true);}
 					// printf("[MESTRE] Recebi Elite de %d\n", status.MPI_SOURCE);
  
-
-					for(size_t i=0; i<(recvSize/(g_problem_size+1)); i++){
-						auto temp_init = tempElite.begin()+ i*(g_problem_size+1);
-						vector<double> tempInd(temp_init, temp_init+g_problem_size);
-						double temp_fitness = tempElite[(i+1)*(g_problem_size+1)-1];
-						// [Todo] Verificar se já está na população
-						pop.push_back({tempInd, temp_fitness});
+					if(recvSize){
+						for(size_t i=0; i<(recvSize/(g_problem_size+1)); i++){
+							auto temp_init = tempElite.begin()+ i*(g_problem_size+1);
+							vector<double> tempInd(temp_init, temp_init+g_problem_size);
+							double temp_fitness = tempElite[(i+1)*(g_problem_size+1)-1];
+							// [Todo] Verificar se já está na população
+							pop.push_back({tempInd, temp_fitness});
+						}	
 					}
+					
 
 					
 				
 					
 					// Limpa população
-					sort(pop.begin(), pop.end(), [](const auto& a, const auto& b){return a.second < b.second;});
+					sort(pop.begin(), pop.end(), [](auto& a, auto& b){return a.second < b.second;});
 					maxPop = max(4, min(maxPop, (recvSize/(g_problem_size+1))*g_fator_pop_size));
 					if(pop.size()>maxPop){pop.erase(pop.begin()+maxPop, pop.end());}
 	
@@ -296,14 +299,17 @@ int main(int argc, char **argv){
 			for(int i=0; i<alg->elite.size(); i++){
 				for(int j=0; j<g_problem_size; j++){
 					tempElite.push_back(get<0>(alg->elite[i])[j]);
-				}	tempElite.push_back(get<1>(alg->elite[i]));
+				}	tempElite.push_back(get<1>(alg->elite[i])-alg->optimum);
 			} 
 
-			printVetMat(tempElite, g_problem_size+1, false); // Individuo + Fitness
+			// printVetMat(tempElite, g_problem_size+1, false); // Individuo + Fitness
 
 			// MPI Testes
-			MPI_Send(&tempElite[0], mat_elite_size, MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD); 
-			printf("Enviei Elite!\n");
+			if(alg->elite.size()>0){
+				MPI_Send(&tempElite[0], alg->elite.size()*(g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD); 
+				printf("Enviei Elite!\n");	
+			}
+			
 			
 
 	
@@ -362,9 +368,6 @@ int main(int argc, char **argv){
 			for(int i=0; i<alg->pop_size; i++){
 				nfes++;
 
-				// following the rules of CEC 2014 real parameter competition,
-				// if the gap between the error values of the best solution found and the optimal solution was 10^{−8} or smaller,
-				// the error was treated as 0
 				if((children_fitness[i] - alg->optimum) < alg->epsilon){children_fitness[i] = alg->optimum;}
 
 				if(children_fitness[i] < bsf_fitness){
@@ -372,12 +375,7 @@ int main(int argc, char **argv){
 					for(int j=0; j < alg->problem_size; j++){bsf_solution[j] = children[i][j];}
 				}
 
-				// if(nfes % 1000 == 0){
-				// //      cout << nfes << " " << bsf_fitness - alg->optimum << endl;
-				// 	cout << bsf_fitness - alg->optimum << endl;
-				// }
-				if(nfes >= alg->max_num_evaluations)
-					break;
+				if(nfes >= alg->max_num_evaluations){break;}
 			}
 			////////////////////////////////////////////////////////////////////////////
 
@@ -485,9 +483,10 @@ int main(int argc, char **argv){
 		} // FIM MAIN WHILE
 
 		cout << "Melhor Fitness: " << bsf_fitness - alg->optimum << endl;
+		cout << "Melhor Solução:"  << endl;
+		printPtrVet(bsf_solution, g_problem_size, false);
 
 		free(temp_fit);
-
 		MPI_Send(NULL, 0, MPI_DOUBLE, RANK_MESTRE, TAG_FINALZ, MPI_COMM_WORLD);
 		printf("[Escravo %d] Enviei Mensagem Finalização!\n", rank);	
 
