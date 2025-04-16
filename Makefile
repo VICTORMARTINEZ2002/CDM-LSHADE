@@ -13,7 +13,7 @@ CFLAGS = -I./include -I./include/pyclustering
 # Parametros da Linha de Comando
 n ?= 1
 FUNCAO  ?= 9 # Ras
-MAXVAR  ?= 10
+MAXVAR  ?= 10    # Must be 10, 30, 50, 100
 MAXFAVL ?= 10000 # Raphael 10000
 MAXFPOP ?= 18    # Raphael    18
 

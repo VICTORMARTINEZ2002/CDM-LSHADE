@@ -106,10 +106,10 @@ int main(int argc, char **argv){
 					int recvSize;
 					MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
 					MPI_Recv(&tempElite[0], recvSize, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_LSHADE, MPI_COMM_WORLD, &status);
-					printf("ELITE RECEBIDA: %d\n", (recvSize/(g_problem_size+1)));
- 
-					if((recvSize/(g_problem_size+1))>0){
-						for(size_t i=0; i<(recvSize/(g_problem_size+1)); i++){
+					
+ 					int tam = recvSize/(g_problem_size+1);
+					if(tam>0){
+						for(size_t i=0; i<tam; i++){
 							auto temp_init = tempElite.begin()+ i*(g_problem_size+1);
 							vector<double> tempInd(temp_init, temp_init+g_problem_size);
 							double temp_fitness = tempElite[(i+1)*(g_problem_size+1)-1];
@@ -124,7 +124,7 @@ int main(int argc, char **argv){
 					
 					// Limpa população
 					sort(pop.begin(), pop.end(), [](auto& a, auto& b){return a.second < b.second;});
-					maxPop = max(4, min(maxPop, (recvSize/(g_problem_size+1))*(size-1))); // [TODO -Revisar]
+					maxPop = max(4, min(maxPop, tam*(size-1))); // [TODO -Revisar]
 					if(pop.size()>maxPop){pop.erase(pop.begin()+maxPop, pop.end());}
 	
 
@@ -317,27 +317,26 @@ int main(int argc, char **argv){
 				// MPI ENVIA
 				if(alg->elite.size()>0){
 					MPI_Send(&tempElite[0], alg->elite.size()*(g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD); 
-					printf("Enviei Elite!\n");	
 				}
 
 				// Inserir na população os padrões
 				MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
-				while(flagMensagem){
-					if(status.MPI_TAG==TAG_MESTRE){
-						int recvSize;
+				if(flagMensagem){
+					int recvSize;
+					do{ // Verificar se estou com a mensagem mais recente
 						MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
 						patterns.resize(recvSize);
-						MPI_Recv(&patterns[0], recvSize, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_MESTRE, MPI_COMM_WORLD, &status);
-						// Mestre já valida tamanho > 0
-						for(size_t i=0; i<min((int)patterns.size()/g_problem_size, alg->pop_size); i++){
-							int idx = sorted_array[(alg->pop_size-1)-i];
-							for(size_t j=0; j<alg->problem_size; j++){
-								pop[idx][j] = patterns[i*g_problem_size+j];
-							}
-						}	
-						
-					}
-					MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
+						MPI_Recv(&patterns[0], recvSize, MPI_DOUBLE, RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+						MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
+					}while(flagMensagem);
+					
+					for(size_t i=0; i<min((int)patterns.size()/g_problem_size, alg->pop_size); i++){
+						int idx = sorted_array[(alg->pop_size-1)-i];
+						for(size_t j=0; j<alg->problem_size; j++){
+							pop[idx][j] = patterns[i*g_problem_size+j];
+						}
+					}	
+
 				}
 
 			}
@@ -365,8 +364,7 @@ int main(int argc, char **argv){
 				}
 
 				// generate F_i and repair its value
-				do
-				{
+				do{
 					pop_sf[target] = alg->cauchy_g(mu_sf, 0.1);
 				} while (pop_sf[target] <= 0);
 
