@@ -41,7 +41,7 @@ void printPopMat(vector<pair<vector<double>, double>>& pop, int col, bool flag){
 			printf("%3.0lf%s", pop[i].first[j], (j<g_problem_size-1 ? ", " : " "));
 		}
 
-		printf("| %.1lf", pop[i].second);
+		printf("| %.3lf", pop[i].second);
 		cout << "}" << ( i<pop.size() ? "\n":"");
 	}   cout << "}" << (flag?"Mestre":"E") << endl;
 }

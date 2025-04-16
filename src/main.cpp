@@ -2,6 +2,13 @@
 #include <cstdlib>   // Clear System
 #include <algorithm> // Sort
 
+#include <pyclustering/cluster/kmeans.hpp>
+#include <pyclustering/cluster/xmeans.hpp>
+#include <pyclustering/cluster/random_center_initializer.hpp>
+
+using namespace pyclustering;
+using namespace pyclustering::clst;
+
 #include "de.h"
 #include "print.h"
 
@@ -55,7 +62,6 @@ int main(int argc, char **argv){
 	cout << "Fator População = " <<        g_fator_pop_size << endl;
 	cout << "Fator Avaliação = " << g_fator_max_evaluations << endl;
 
-
 	// Inicialização MPI
 	int rank, size;
 	int flagMensagem;
@@ -73,48 +79,21 @@ int main(int argc, char **argv){
 	g_p_best_rate = 0.11;
 
 	// DM-L-SHADE parameters
+	int number_of_patterns;
+	vector<double> patterns; // Also MPI Parameter
 	double          elite_rate = 0.1;
 	double       clusters_rate = 0.1468;
-	int mining_generation_step = 168;
+	int mining_generation_step = 25; //168;
 
-	int max_elite_size     = std::round(elite_rate * g_pop_size);
-	int number_of_patterns = std::round(elite_rate * g_pop_size); // [TODO - revisar]
 
 	// MPI Parametros
-	int mat_elite_size = max_elite_size*(g_problem_size+1); // +1 -> Fitness
-	vector<double> tempElite(mat_elite_size);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	vector<double> tempElite(std::round(elite_rate*g_pop_size)*(g_problem_size+1));
 
 
 
 	if(rank==0){ // Mestre
-		printf("Olá Mundo - rank %d size %d\n", rank, size);
-
-		bool debugFlag=true;
-		
+		int maxPop = (size-1)*elite_rate*g_pop_size;		
 		vector<pair<vector<double>, double>> pop;
-		int maxPop = (size-1)*elite_rate*g_pop_size;
 
 		int newMine = false; // Nova Mineração
 
@@ -128,10 +107,8 @@ int main(int argc, char **argv){
 					MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
 					MPI_Recv(&tempElite[0], recvSize, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_LSHADE, MPI_COMM_WORLD, &status);
 					printf("ELITE RECEBIDA: %d\n", (recvSize/(g_problem_size+1)));
-					//if(debugFlag){printVetMat(tempElite, g_problem_size+1, true);}
-					// printf("[MESTRE] Recebi Elite de %d\n", status.MPI_SOURCE);
  
-					if(recvSize){
+					if((recvSize/(g_problem_size+1))>0){
 						for(size_t i=0; i<(recvSize/(g_problem_size+1)); i++){
 							auto temp_init = tempElite.begin()+ i*(g_problem_size+1);
 							vector<double> tempInd(temp_init, temp_init+g_problem_size);
@@ -147,28 +124,62 @@ int main(int argc, char **argv){
 					
 					// Limpa população
 					sort(pop.begin(), pop.end(), [](auto& a, auto& b){return a.second < b.second;});
-					maxPop = max(4, min(maxPop, (recvSize/(g_problem_size+1))*g_fator_pop_size));
+					maxPop = max(4, min(maxPop, (recvSize/(g_problem_size+1))*(size-1))); // [TODO -Revisar]
 					if(pop.size()>maxPop){pop.erase(pop.begin()+maxPop, pop.end());}
 	
 
-					newMine = true; // Ativa mineração
+					newMine = true; // Ativa mineração [TODO - Criterio MIn de Mineração]
 
 				}else if(status.MPI_TAG==TAG_FINALZ){
 					MPI_Recv(NULL, 0, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_FINALZ, MPI_COMM_WORLD, &status);
 					statusEscravos[status.MPI_SOURCE-1]=true;
-					printf("[MESTRE] Recebi FIM de %d\n", status.MPI_SOURCE);
 				}
 
-				// Busca novas mensagens
 				MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status); 
 			}
 
-			if(newMine){newMine = false;;}
+			if(newMine){
+				newMine = false;
+				number_of_patterns = clusters_rate*(elite_rate*pop.size());
+				vector<vector<double>> data;
+				for(size_t i=0; i<pop.size(); i++){
+					data.push_back(vector<double>(get<0>(pop[i]).begin(), get<0>(pop[i]).begin() + g_problem_size));
+				}
+
+				vector<vector<double> > start_centers;
+				pyclustering::clst::xmeans_data output_result;
+				long seed = 1;
+
+				if(number_of_patterns>0){
+					output_result.clusters().clear();
+					random_center_initializer(number_of_patterns, seed).initialize(data, start_centers);
+					kmeans solver(start_centers);
+					solver.process(data, output_result);
+				}else{
+					random_center_initializer(1, seed).initialize(data, start_centers);
+					xmeans solver(start_centers, pop.size(), 1e-4, splitting_type::BAYESIAN_INFORMATION_CRITERION, 1, seed);
+					solver.process(data, output_result);
+				}
+				
+				patterns.clear();
+				auto centers = output_result.centers();
+				for(auto center:centers){
+					for(size_t j=0; j<g_problem_size; j++){
+						patterns.push_back(center[j]);
+					}
+				}
+
+				// Enviar em "Broadcast" os padroes para os Escravos
+				if((patterns.size()/g_problem_size)>0){
+					for(int i=1; i<size; i++){
+						MPI_Send(&patterns[0], patterns.size(), MPI_DOUBLE, i, TAG_MESTRE, MPI_COMM_WORLD); 
+					}
+				}
 
 
+			}
 
 		}
-		printf("Mestre Terminou\n");
 		printPopMat(pop, g_problem_size, true);
 	}
 
@@ -194,7 +205,7 @@ int main(int argc, char **argv){
 
 
 	if(rank>=1){
-		DMLSHADE *alg          = new DMLSHADE(max_elite_size, number_of_patterns, mining_generation_step);
+		DMLSHADE *alg = new DMLSHADE(std::round(elite_rate*g_pop_size), number_of_patterns, mining_generation_step);
 		// searchAlgorithm *alg = new LSHADE();
 
 		// Inicio do Run
@@ -280,9 +291,6 @@ int main(int argc, char **argv){
 		int min_pop_size = 4;
 		int plan_pop_size;
 
-		// Patterns set 
-		vector<map<int, double>> patterns;
-
 	// MAIN LOOP
 		while(nfes < alg->max_num_evaluations){
 			alg->generation++;
@@ -304,28 +312,40 @@ int main(int argc, char **argv){
 
 			// printVetMat(tempElite, g_problem_size+1, false); // Individuo + Fitness
 
-			// MPI Testes
-			if(alg->elite.size()>0){
-				MPI_Send(&tempElite[0], alg->elite.size()*(g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD); 
-				printf("Enviei Elite!\n");	
-			}
-			
-			
-
-	
+			// MPI ENVIA ELITE
 			if(alg->generation % mining_generation_step == 0){
-				patterns = alg->minePatterns(); // [TODO - Abrir pro mestre]
-
-				// Inseir na populção os padrões
-				for(size_t i=0; i<min((int)patterns.size(), alg->pop_size); i++){
-					int idx = sorted_array[(alg->pop_size-1)-i];
-					for(size_t j=0; j<alg->problem_size; j++){pop[idx][j] = patterns[i][j];}
+				// MPI ENVIA
+				if(alg->elite.size()>0){
+					MPI_Send(&tempElite[0], alg->elite.size()*(g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD); 
+					printf("Enviei Elite!\n");	
 				}
+
+				// Inserir na população os padrões
+				MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
+				while(flagMensagem){
+					if(status.MPI_TAG==TAG_MESTRE){
+						int recvSize;
+						MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
+						patterns.resize(recvSize);
+						MPI_Recv(&patterns[0], recvSize, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_MESTRE, MPI_COMM_WORLD, &status);
+						// Mestre já valida tamanho > 0
+						for(size_t i=0; i<min((int)patterns.size()/g_problem_size, alg->pop_size); i++){
+							int idx = sorted_array[(alg->pop_size-1)-i];
+							for(size_t j=0; j<alg->problem_size; j++){
+								pop[idx][j] = patterns[i*g_problem_size+j];
+							}
+						}	
+						
+					}
+					MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
+				}
+
 			}
+			
 
 
 	// AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-			// A PARTIR DAQUI A GENTE ABSTRAI QUE ISSO É O LSHADE e somos felizes
+			// A PARTIR DAQUI A GENTE ABSTRAI QUE ISSO É O LSHADE e somos menos triste
 			for(int target = 0; target < alg->pop_size; target++){
 				// In each generation, CR_i and F_i used by each individual x_i are generated by first selecting 
 				// an index r_i randomly from [1, H]
