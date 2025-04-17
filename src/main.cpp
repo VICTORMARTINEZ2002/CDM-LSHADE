@@ -83,7 +83,7 @@ int main(int argc, char **argv){
 	vector<double> patterns; // Also MPI Parameter
 	double          elite_rate = 0.1;
 	double       clusters_rate = 0.1468;
-	int mining_generation_step = 25; //168;
+	int mining_generation_step = 50; //168;
 
 
 	// MPI Parametros
@@ -98,6 +98,8 @@ int main(int argc, char **argv){
 		int newMine = false; // Nova Mineração
 
 		vector<bool> statusEscravos(size-1, false);
+
+		double start = MPI_Wtime();
 		while(!stop(statusEscravos)){
 
 			MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
@@ -124,7 +126,7 @@ int main(int argc, char **argv){
 					
 					// Limpa população
 					sort(pop.begin(), pop.end(), [](auto& a, auto& b){return a.second < b.second;});
-					maxPop = max(4, min(maxPop, tam*(size-1))); // [TODO -Revisar]
+					maxPop = max(4, min(maxPop, tam));//(int)(tam/2)*(size-1))); // [TODO -Revisar]
 					if(pop.size()>maxPop){pop.erase(pop.begin()+maxPop, pop.end());}
 	
 
@@ -175,12 +177,17 @@ int main(int argc, char **argv){
 						MPI_Send(&patterns[0], patterns.size(), MPI_DOUBLE, i, TAG_MESTRE, MPI_COMM_WORLD); 
 					}
 				}
+				printf("Mestre Finaliza Mineração\n");
 
 
 			}
 
 		}
+		double end = MPI_Wtime();
+
 		printPopMat(pop, g_problem_size, true);
+		cout << "Tempo Execução: " << (end-start) << endl;
+
 	}
 
 
