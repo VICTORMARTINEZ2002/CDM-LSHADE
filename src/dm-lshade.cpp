@@ -4,6 +4,7 @@
 #include <pyclustering/cluster/xmeans.hpp>
 #include <pyclustering/cluster/random_center_initializer.hpp>
 
+
 using namespace pyclustering;
 using namespace pyclustering::clst;
 
@@ -15,7 +16,7 @@ DMLSHADE::DMLSHADE(int max_elite_size, int number_of_patterns, int mining_genera
 }
 
 double DMLSHADE::run(){
-	cout << scientific << setprecision(8);
+	cout << setprecision(8);
 	initializeParameters();
 	setSHADEParameters();
 
@@ -43,7 +44,6 @@ double DMLSHADE::run(){
 		bsf_solution[j] = pop[0][j];
 	/////////////////////////////////////////////////////////////////////////
 	for(int i=0; i<pop_size; i++){
-		nfes++;
 
 		if((fitness[i] - optimum) < epsilon){fitness[i] = optimum;}
 
@@ -58,8 +58,7 @@ double DMLSHADE::run(){
 		//   cout << bsf_fitness - optimum << endl;
 		// }
 
-		if(nfes >= max_num_evaluations)
-			break;
+		if((++nfes) >= max_num_evaluations){break;}
 	}
 	////////////////////////////////////////////////////////////////////////////
 

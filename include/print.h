@@ -1,10 +1,10 @@
-void printPtrVet(double* vet, int maxvar, bool flag){
+void printPtrVet(double* vet, int maxvar){
 	cout << "{";
-	for(int i = 0; i < maxvar; i++){
-		cout << (i == 0 ? "" : " ") << vet[i];  // Acessa diretamente cada valor no vetor
-		if (i < maxvar - 1) cout << ", ";  // Coloca uma vírgula entre os elementos
-	}
-	cout << "}" << (flag ? "M" : "E") << endl;
+	for(int i=0; i<maxvar; i++){
+		cout << (i==0 ? "":" ");
+		printf("%.0lf", vet[i]);
+		if(i<maxvar-1){cout << ", ";}  
+	} cout << "}" << endl;
 }
 
 
