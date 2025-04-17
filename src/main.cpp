@@ -11,6 +11,7 @@ using namespace pyclustering::clst;
 
 #include "de.h"
 #include "print.h"
+#include "statistics.h"
 
 #define RANK_MESTRE 0
 #define RANK_LSHADE 1
@@ -90,10 +91,13 @@ int main(int argc, char **argv){
 		cout << "Fator Avaliação = " << g_fator_max_evaluations << endl;
 		cout << setprecision(8);
 
+		vector<double> mineTime;
 		double start = MPI_Wtime();
-
 		vector<vector<double>> bestSolutions(max(1,size-1), vector<double>(g_problem_size+1));
+
+
 		if(size==1){
+			// [TODO] Mine Time
 			DMLSHADE *alg = new DMLSHADE(std::round(elite_rate*g_pop_size), number_of_patterns, mining_generation_step);
 			bestSolutions[0][g_problem_size] = alg->run();
 			
@@ -115,7 +119,7 @@ int main(int argc, char **argv){
 						MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
 						MPI_Recv(&tempElite[0], recvSize, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_LSHADE, MPI_COMM_WORLD, &status);
 						
-	 					int tam = recvSize/(g_problem_size+1);
+						int tam = recvSize/(g_problem_size+1);
 						if(tam>0){
 							for(size_t i=0; i<tam; i++){
 								auto temp_init = tempElite.begin()+ i*(g_problem_size+1);
@@ -126,10 +130,10 @@ int main(int argc, char **argv){
 							}	
 						}
 						
-						
 						// Limpa população
 						sort(pop.begin(), pop.end(), [](auto& a, auto& b){return a.second < b.second;});
-						maxPop = max(4, min(maxPop, tam));//(int)(tam/2)*(size-1))); // [TODO -Revisar]
+						maxPop = max(4, min(maxPop, tam)); 
+						//maxPop = (int)(tam/2)*(size-1))); // [TODO -Revisar]
 						if(pop.size()>maxPop){pop.erase(pop.begin()+maxPop, pop.end());}
 		
 
@@ -139,6 +143,7 @@ int main(int argc, char **argv){
 						MPI_Recv(&bsf_solution[0], (g_problem_size+1), MPI_DOUBLE, MPI_ANY_SOURCE, TAG_FINALZ, MPI_COMM_WORLD, &status);
 						contFinlz++;
 						bestSolutions[status.MPI_SOURCE-1] = bsf_solution;
+						bestSolutions[status.MPI_SOURCE-1][g_problem_size] -= (100*g_function_number); // Fix Fitness;
 					}
 
 					MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status); 
@@ -146,6 +151,7 @@ int main(int argc, char **argv){
 
 				if(newMine){
 					newMine = false;
+					double startMine = MPI_Wtime();
 					number_of_patterns = clusters_rate*(elite_rate*pop.size());
 					vector<vector<double>> data;
 					for(size_t i=0; i<pop.size(); i++){
@@ -181,8 +187,8 @@ int main(int argc, char **argv){
 							MPI_Send(&patterns[0], patterns.size(), MPI_DOUBLE, i, TAG_MESTRE, MPI_COMM_WORLD); 
 						}
 					}
-					
 
+					mineTime.push_back(MPI_Wtime()-startMine);
 				}
 
 			}
@@ -198,11 +204,23 @@ int main(int argc, char **argv){
 		}
 		bsf_fitness  = bestSolutions[posBest][g_problem_size];
 		//bsf_solution.assign(bestSolutions[posBest].begin(), bestSolutions[posBest].end()-1);
-
-		double end = MPI_Wtime();
-		cout << "Melhor Fitness: " << (size==1 ? bsf_fitness : bsf_fitness-(100*g_function_number)) << endl;
-		cout << "Tempo Execução Exec " << (size) << ": " << (end-start) << endl;
 		
+		double execTime = MPI_Wtime()-start;
+		std::ostringstream pathfile;
+		pathfile << "./logs/" << g_function_number << "-" << g_problem_size << "-" << size << ".log";
+		std::ofstream file(pathfile.str(), ios::app); // Escrever ao Final 
+		if(file.is_open()){
+			file << execTime << endl;
+			cout << "Log atualizado com sucesso!" << endl;
+			file.close();
+		}
+
+		cout << "Melhor Fitness: "                      << bsf_fitness     << endl;
+		cout << "Tempo Execução: "                      << execTime        << endl;
+		cout << "Quantidade de Minerações: "            << mineTime.size() << endl;
+		cout << "Média do Tempo de Mineração: "         << mean(mineTime)  << endl;
+		cout << "Desvio Padrão do Tempo de Mineração: " << stdev(mineTime) << endl;
+
 
 	}
 
