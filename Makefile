@@ -16,6 +16,8 @@ FUNCAO  ?= 9 # Ras
 MAXVAR  ?= 10    # Must be 10, 30, 50, 100
 MAXFAVL ?= 10000 # Raphael 10000
 MAXFPOP ?= 18    # Raphael    18
+MAXFSLV ?= .0    # main -> min=3
+DIVERSD ?= 0
 
 $(TARGET): $(OBJS)
 	mpicxx -o $(TARGET) $(OBJS) $(OPTION) $(LDFLAGS)
@@ -23,10 +25,16 @@ $(TARGET): $(OBJS)
 %.o: %.cpp
 	mpicxx $(CFLAGS) -c $< -o $@
 
+build:
+	$(MAKE)
+
 run:
+	mpirun -np $(n) ./$(TARGET) $(FUNCAO) $(MAXVAR) $(MAXFPOP) $(MAXFSLV) $(MAXFAVL) $(DIVERSD) 		
+
+all:
 	rm -rf src/*.o $(TARGET)
 	$(MAKE)
-	mpirun -np $(n) ./$(TARGET) $(FUNCAO) $(MAXVAR) $(MAXFPOP) $(MAXFAVL)
+	mpirun -np $(n) ./$(TARGET) $(FUNCAO) $(MAXVAR) $(MAXFPOP) $(MAXFSLV) $(MAXFAVL) $(DIVERSD) 	
 
 
 

@@ -1,4 +1,5 @@
 #include <mpi.h>
+#include <limits>
 #include <cstdlib>   // Clear System
 #include <algorithm> // Sort
 
@@ -28,6 +29,7 @@ int g_function_number;
 int g_problem_size;
 int g_fator_max_evaluations;
 int g_fator_pop_size;
+double g_fator_slaveSize;
 unsigned int g_max_num_evaluations;
 
 int    g_pop_size;
@@ -35,16 +37,58 @@ double g_arc_rate;
 int    g_memory_size;
 double g_p_best_rate;
 
+// Diversidade
+int g_flag_diversidade;
+
+
+// Função para Inserção de Individuos na população do Mestre
+// Para considerar diversidade, passe o número de processos size
+// Para uma abordagem Meritocratica ("Elite das Elites"), passe 1 como size
+void inserirPopMestre(vector<pair<vector<double>, double>>& pop, vector<double>& elite, int slaveSize, int rank, int size){
+	int popSize = pop.size();
+	int tam = elite.size()/(g_problem_size+1);
+
+	size = max(size,2);
+	vector<int> intv(size); //3 Escravos -> [0,3,6,9]
+	for(int i=0; i<intv.size(); i++){intv[i]=i*slaveSize;}
+
+	for(int i=0; i<tam; i++){
+		auto temp_init = elite.begin()+ i*(g_problem_size+1);
+		vector<double> tempInd(temp_init, temp_init+g_problem_size);
+		double temp_fitness = elite[(i+1)*(g_problem_size+1)-1];
+
+		pop.insert(pop.begin(), {tempInd, temp_fitness}); // + intv[rank] + i // Insere no fim do intervalo
+	}
+
+	// Ordenação 
+	if(size>2){ // Parcial
+		sort(pop.begin()+intv[rank-1], pop.begin()+intv[rank]+tam, [](auto& a, auto& b){return a.second < b.second;});
+		pop.erase(pop.begin()+intv[rank-1]+slaveSize, pop.begin()+intv[rank]+tam);		
+	}else{ // Total
+		sort(pop.begin(), pop.end(), [](auto& a, auto& b){return a.second < b.second;});
+		pop.erase(pop.begin()+popSize, pop.end());
+	}
+	// TODO - COntrole tamanho da Pop
+}
+
+bool isTrue(vector<bool> vet){
+	bool flag = true;
+	for(int i=0; i<vet.size(); i++){flag &= vet[i];}
+	return flag;
+}
 
 
 int main(int argc, char **argv){
 	srand((unsigned)time(NULL));
 
+//INICIALIZAÇÃO DE PARAMETROS
 	// Leitura Parâmetros
 	g_function_number       = std::atoi(argv[1]);
 	g_problem_size          = std::atoi(argv[2]); // 10, 30, 50, 100
 	g_fator_pop_size        = std::atoi(argv[3]);
-	g_fator_max_evaluations = std::atoi(argv[4]);
+	g_fator_slaveSize       = std::atof(argv[4]);
+	g_fator_max_evaluations = std::atoi(argv[5]);
+	g_flag_diversidade      = std::atoi(argv[6]);
 	g_max_num_evaluations   = (g_fator_max_evaluations*g_problem_size); //available number of fitness evaluations 
 
 	// Inicialização MPI
@@ -75,11 +119,12 @@ int main(int argc, char **argv){
 
 	// MPI Parametros
 	vector<double> tempElite(std::round(elite_rate*g_pop_size)*(g_problem_size+1));
+	int slaveSize  = max(3, static_cast<int>(round(g_pop_size * elite_rate * g_fator_slaveSize)));
 
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//													DIVISÃO RANKS													//
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//													DIVISÃO RANKS													//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	if(rank==0){ // Mestre
 		// Impressão Parâmetros
@@ -102,16 +147,14 @@ int main(int argc, char **argv){
 			bestSolutions[0][g_problem_size] = alg->run();
 			
 		}else{
-
 			int contFinlz=0;
 			int newMine = false;
 			int maxPop = (size-1)*elite_rate*g_pop_size;
+			vector<pair<vector<double>, double>> pop(slaveSize*(size-1), {vector<double>(g_problem_size, 0.0), std::numeric_limits<double>::max()});
 
-			vector<pair<vector<double>, double>> pop;
-			
+			vector<bool> slaveRecv(size-1, false);
 
 			while(contFinlz<(size-1)){
-
 				MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
 				while(flagMensagem){
 					if(status.MPI_TAG==TAG_LSHADE){
@@ -119,25 +162,14 @@ int main(int argc, char **argv){
 						MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
 						MPI_Recv(&tempElite[0], recvSize, MPI_DOUBLE, MPI_ANY_SOURCE, TAG_LSHADE, MPI_COMM_WORLD, &status);
 						
-						int tam = recvSize/(g_problem_size+1);
-						if(tam>0){
-							for(size_t i=0; i<tam; i++){
-								auto temp_init = tempElite.begin()+ i*(g_problem_size+1);
-								vector<double> tempInd(temp_init, temp_init+g_problem_size);
-								double temp_fitness = tempElite[(i+1)*(g_problem_size+1)-1];
-								// [Todo] Verificar se já está na população
-								pop.push_back({tempInd, temp_fitness});
-							}	
-						}
-						
-						// Limpa população
-						sort(pop.begin(), pop.end(), [](auto& a, auto& b){return a.second < b.second;});
-						maxPop = max(4, min(maxPop, tam)); 
-						//maxPop = (int)(tam/2)*(size-1))); // [TODO -Revisar]
-						if(pop.size()>maxPop){pop.erase(pop.begin()+maxPop, pop.end());}
-		
+						slaveRecv[status.MPI_SOURCE-1]=true;
 
-						newMine = true; // Ativa mineração [TODO - Criterio MIn de Mineração]
+						int tam = tempElite.size()/(g_problem_size+1);
+						if(tam>=1){
+							inserirPopMestre(pop, tempElite, slaveSize, status.MPI_SOURCE, (g_flag_diversidade?size:2));
+							printPopMat(pop, g_problem_size, true);
+						}
+						if(isTrue(slaveRecv)){newMine = true;} // Ativa mineração [TODO - Criterio MIn de Mineração]
 
 					}else if(status.MPI_TAG==TAG_FINALZ){
 						MPI_Recv(&bsf_solution[0], (g_problem_size+1), MPI_DOUBLE, MPI_ANY_SOURCE, TAG_FINALZ, MPI_COMM_WORLD, &status);
@@ -150,6 +182,7 @@ int main(int argc, char **argv){
 				}
 
 				if(newMine){
+					printf("Nova Mineração\n");
 					newMine = false;
 					double startMine = MPI_Wtime();
 					number_of_patterns = clusters_rate*(elite_rate*pop.size());
