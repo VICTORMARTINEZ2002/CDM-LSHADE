@@ -16,7 +16,7 @@ FUNCAO  ?= 9 # Ras
 MAXVAR  ?= 10    # Must be 10, 30, 50, 100
 MAXFAVL ?= 10000 # Raphael 10000
 MAXFPOP ?= 18    # Raphael    18
-MAXFSLV ?= 24   # % Elite Enviada [main -> min=3]
+MAXFSLV ?= 24    # % Elite Enviada [main -> min=3]
 DIVERSD ?= 1
 
 SCRIPTF ?= 0     # No Print Results
