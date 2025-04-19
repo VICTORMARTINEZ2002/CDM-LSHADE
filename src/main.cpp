@@ -40,6 +40,8 @@ double g_p_best_rate;
 // Diversidade
 int g_flag_diversidade;
 
+// Flag Script
+int g_flag_script;
 
 // Função para Inserção de Individuos na população do Mestre
 // Para considerar diversidade, passe o número de processos size
@@ -86,9 +88,10 @@ int main(int argc, char **argv){
 	g_function_number       = std::atoi(argv[1]);
 	g_problem_size          = std::atoi(argv[2]); // 10, 30, 50, 100
 	g_fator_pop_size        = std::atoi(argv[3]);
-	g_fator_slaveSize       = std::atof(argv[4]);
+	g_fator_slaveSize       = std::atoi(argv[4]);
 	g_fator_max_evaluations = std::atoi(argv[5]);
 	g_flag_diversidade      = std::atoi(argv[6]);
+	g_flag_script           = std::atoi(argv[7]);
 	g_max_num_evaluations   = (g_fator_max_evaluations*g_problem_size); //available number of fitness evaluations 
 
 	// Inicialização MPI
@@ -119,8 +122,8 @@ int main(int argc, char **argv){
 
 	// MPI Parametros
 	vector<double> tempElite(std::round(elite_rate*g_pop_size)*(g_problem_size+1));
-	int slaveSize  = max(3, static_cast<int>(round(g_pop_size * elite_rate * g_fator_slaveSize)));
-
+	double _slaveSlice = round(g_pop_size*elite_rate*(g_fator_slaveSize/100.0));
+	int slaveSize      = max(3, static_cast<int>(_slaveSlice));
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //													DIVISÃO RANKS													//
@@ -128,13 +131,19 @@ int main(int argc, char **argv){
 
 	if(rank==0){ // Mestre
 		// Impressão Parâmetros
-		std::system("clear");
-		cout << "//------------------------- DM-LSHADE PARALLEL (N="<<size<<") -------------------------//" << endl;
-		cout << "Function        = " <<       g_function_number << endl;
-		cout << "Dimension size  = " <<          g_problem_size << endl;
-		cout << "Fator População = " <<        g_fator_pop_size << endl;
-		cout << "Fator Avaliação = " << g_fator_max_evaluations << endl;
-		cout << setprecision(8);
+		if(!g_flag_script){
+			std::system("clear");
+			cout << "//------------------------- DM-LSHADE PARALLEL (N="<<size<<") -------------------------//" << endl;
+			cout << "Function          = " <<     g_function_number << endl;
+			cout << "Dimension size    = " <<        g_problem_size << endl;
+			cout << "Flag Diversidade  = " <<    g_flag_diversidade << endl;
+			cout << "Tamanho População = " <<            g_pop_size << endl;
+			cout << "Tamanho Elite Mst = " <<    slaveSize*(size-1) << endl;
+			cout << "Max. Avaliação    = " << g_max_num_evaluations << endl;
+
+			cout << setprecision(8);	
+		}
+		
 
 		vector<double> mineTime;
 		double start = MPI_Wtime();
@@ -166,8 +175,9 @@ int main(int argc, char **argv){
 
 						int tam = tempElite.size()/(g_problem_size+1);
 						if(tam>=1){
+							// [Future Work] -> Inserir todos na elite (Todas Mensagens) pra depois ordenar e podar.
 							inserirPopMestre(pop, tempElite, slaveSize, status.MPI_SOURCE, (g_flag_diversidade?size:2));
-							printPopMat(pop, g_problem_size, true);
+							//printPopMat(pop, g_problem_size, true);
 						}
 						if(isTrue(slaveRecv)){newMine = true;} // Ativa mineração [TODO - Criterio MIn de Mineração]
 
@@ -182,7 +192,6 @@ int main(int argc, char **argv){
 				}
 
 				if(newMine){
-					printf("Nova Mineração\n");
 					newMine = false;
 					double startMine = MPI_Wtime();
 					number_of_patterns = clusters_rate*(elite_rate*pop.size());
@@ -200,7 +209,7 @@ int main(int argc, char **argv){
 						random_center_initializer(number_of_patterns, seed).initialize(data, start_centers);
 						kmeans solver(start_centers);
 						solver.process(data, output_result);
-					}else{
+					}else{ // [TODO] N=8 MAXVAR=100 -> PROBLEMA
 						random_center_initializer(1, seed).initialize(data, start_centers);
 						xmeans solver(start_centers, pop.size(), 1e-4, splitting_type::BAYESIAN_INFORMATION_CRITERION, 1, seed);
 						solver.process(data, output_result);
@@ -237,29 +246,34 @@ int main(int argc, char **argv){
 		}
 		bsf_fitness  = bestSolutions[posBest][g_problem_size];
 		//bsf_solution.assign(bestSolutions[posBest].begin(), bestSolutions[posBest].end()-1);
-		
+
+		// Output
 		double execTime = MPI_Wtime()-start;
+
 		std::ostringstream pathfile;
-		pathfile << "./logs/" << g_function_number << "-" << g_problem_size << "-" << size << ".log";
+		pathfile << "./output/logs/" << g_function_number << "-" << g_problem_size << "-" << size << ".log";
+
 		std::ofstream file(pathfile.str(), ios::app); // Escrever ao Final 
 		if(file.is_open()){
-			file << execTime << endl;
-			cout << "Log atualizado com sucesso!" << endl;
+			file << execTime << "," << bsf_fitness << "," << g_flag_diversidade << endl;
 			file.close();
 		}
 
-		cout << "Melhor Fitness: "                      << bsf_fitness     << endl;
-		cout << "Tempo Execução: "                      << execTime        << endl;
-		cout << "Quantidade de Minerações: "            << mineTime.size() << endl;
-		cout << "Média do Tempo de Mineração: "         << mean(mineTime)  << endl;
-		cout << "Desvio Padrão do Tempo de Mineração: " << stdev(mineTime) << endl;
-
+		// Print Results
+		if(!g_flag_script){
+			cout << "Melhor Fitness: "                      << bsf_fitness     << endl;
+			cout << "Tempo Execução: "                      << execTime        << endl;
+			cout << "Quantidade de Minerações: "            << mineTime.size() << endl;
+			cout << "Média do Tempo de Mineração: "         << mean(mineTime)  << endl;
+			cout << "Desvio Padrão do Tempo de Mineração: " << stdev(mineTime) << endl;
+			// [TODO] Mean, Std Fitness Interno
+		}
 
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//													DIVISÃO RANKS													//
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//													DIVISÃO RANKS													//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	if(rank>=1){
 		DMLSHADE *alg = new DMLSHADE(std::round(elite_rate*g_pop_size), number_of_patterns, mining_generation_step);
@@ -385,7 +399,7 @@ int main(int argc, char **argv){
 						MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
 					}while(flagMensagem);
 					
-					for(size_t i=0; i<min((int)patterns.size()/g_problem_size, alg->pop_size); i++){
+					for(size_t i=0; i<min((int)patterns.size()/g_problem_size, alg->pop_size/3); i++){
 						int idx = sorted_array[(alg->pop_size-1)-i];
 						for(size_t j=0; j<alg->problem_size; j++){
 							pop[idx][j] = patterns[i*g_problem_size+j];
@@ -562,9 +576,9 @@ int main(int argc, char **argv){
 
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//													DIVISÃO RANKS													//
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//													DIVISÃO RANKS													//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	// Impressão dos Resultados

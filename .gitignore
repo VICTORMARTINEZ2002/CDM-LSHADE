@@ -11,5 +11,6 @@
 *.tmp
 *.d
 
-logs/*
+output/logs/*
+output/report/*
 solver
