@@ -1,5 +1,5 @@
 HEADER = de.h
-TARGET = solver
+OUTPUT = solver
 
 OBJS := $(patsubst %.cpp,%.o,$(shell find src -name '*.cpp'))
 OPTION = -std=c++14 -O3
@@ -20,9 +20,10 @@ MAXFSLV ?= 24    # % Elite Enviada [main -> min=3]
 DIVERSD ?= 1
 
 SCRIPTF ?= 0     # No Print Results
+TARGET  ?= -1    # Time to Target (Assume Min Fitness como Melhor)
 
-$(TARGET): $(OBJS)
-	mpicxx -o $(TARGET) $(OBJS) $(OPTION) $(LDFLAGS)
+$(OUTPUT): $(OBJS)
+	mpicxx -o $(OUTPUT) $(OBJS) $(OPTION) $(LDFLAGS)
 
 %.o: %.cpp
 	mpicxx $(CFLAGS) -c $< -o $@
@@ -31,15 +32,15 @@ build:
 	$(MAKE)
 
 run: #Exec Silenciosa
-	@mpirun -np $(n) ./$(TARGET) $(FUNCAO) $(MAXVAR) $(MAXFPOP) $(MAXFSLV) $(MAXFAVL) $(DIVERSD) $(SCRIPTF)		
+	@mpirun -np $(n) ./$(OUTPUT) $(FUNCAO) $(MAXVAR) $(MAXFPOP) $(MAXFSLV) $(MAXFAVL) $(DIVERSD) $(TARGET) $(SCRIPTF)		
 
 all:
-	rm -rf src/*.o $(TARGET)
+	rm -rf src/*.o $(OUTPUT)
 	$(MAKE)
 	clear
-	mpirun -np $(n) ./$(TARGET) $(FUNCAO) $(MAXVAR) $(MAXFPOP) $(MAXFSLV) $(MAXFAVL) $(DIVERSD) $(SCRIPTF) 	
+	mpirun -np $(n) ./$(OUTPUT) $(FUNCAO) $(MAXVAR) $(MAXFPOP) $(MAXFSLV) $(MAXFAVL) $(DIVERSD) $(TARGET) $(SCRIPTF) 	
 
 
 
 cls:
-	rm -rf src/*.o $(TARGET)
+	rm -rf src/*.o $(OUTPUT)

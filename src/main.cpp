@@ -20,6 +20,7 @@ using namespace pyclustering::clst;
 #define TAG_FINALZ 0
 #define TAG_MESTRE 1
 #define TAG_LSHADE 2
+#define TAG_TARGET 3
 
 // Variaveis Funções de Benchmark
 double *OShift,*M,*y,*z,*x_bound;
@@ -41,7 +42,10 @@ double g_p_best_rate;
 int g_flag_diversidade;
 
 // Flag Script
+int g_target;
 int g_flag_script;
+
+
 
 // Função para Inserção de Individuos na população do Mestre
 // Para considerar diversidade, passe o número de processos size
@@ -81,6 +85,7 @@ bool isTrue(vector<bool> vet){
 
 
 int main(int argc, char **argv){
+	double start = MPI_Wtime();
 	srand((unsigned)time(NULL));
 
 //INICIALIZAÇÃO DE PARAMETROS
@@ -91,7 +96,8 @@ int main(int argc, char **argv){
 	g_fator_slaveSize       = std::stoi(argv[4]);
 	g_fator_max_evaluations = std::stoi(argv[5]);
 	g_flag_diversidade      = std::stoi(argv[6]);
-	g_flag_script           = std::stoi(argv[7]);
+	g_target 				= std::stof(argv[7]); // (target<0) -> NO TARGET
+	g_flag_script           = std::stoi(argv[8]);
 	g_max_num_evaluations   = (g_fator_max_evaluations*g_problem_size); //available number of fitness evaluations 
 
 // Inicialização MPI
@@ -117,7 +123,7 @@ int main(int argc, char **argv){
 	vector<double> patterns; // Also MPI Parameter
 	double          elite_rate = 0.1;
 	double       clusters_rate = 0.1468;
-	int mining_generation_step = 168; // "Min" - 25; Raphael 168;
+	int mining_generation_step = 50; // "Min" - 25; Raphael 168;
 
 // MPI Parametros
 	vector<double> tempElite(std::round(elite_rate*g_pop_size)*(g_problem_size+1));
@@ -140,12 +146,11 @@ if(rank==RANK_MESTRE){
 		cout << "Tamanho População = " <<            g_pop_size << endl;
 		cout << "Tamanho Elite Mst = " <<    slaveSize*(size-1) << endl;
 		cout << "Max. Avaliação    = " << g_max_num_evaluations << endl;
+		cout << "Target            = " << 			   g_target << endl;
 		cout << setprecision(8);	
 	}
 	
-
 	vector<double> mineTime;
-	double start = MPI_Wtime();
 	vector<vector<double>> bestSolutions(max(1,size-1), vector<double>(g_problem_size+1));
 
 	// Buffer Patterns
@@ -154,6 +159,7 @@ if(rank==RANK_MESTRE){
 	buf_size += MPI_BSEND_OVERHEAD;
 	buf_size *= 400; // "Min" -> 150
 
+	int numAvalTarget=0; // Avaliações de Target
 	std::vector<double> buffer(buf_size);
 	MPI_Buffer_attach(buffer.data(), buf_size);
 
@@ -188,9 +194,14 @@ if(rank==RANK_MESTRE){
 						// [Future Work] -> Inserir todos na elite (Todas Mensagens) pra depois ordenar e podar.
 						if(recvSize/(g_problem_size+1) >= 1){
 							inserirPopMestre(pop, tempElite, slaveSize, status.MPI_SOURCE, (g_flag_diversidade?size:2));
-							//printPopMat(pop, g_problem_size, true);
 						}
 						if(mineTime.size() || isTrue(slaveInit)){newMine = true;} // mineTime.size() -> Otimizar IF;
+
+					}else if(status.MPI_TAG==TAG_TARGET){ 
+						MPI_Recv(&numAvalTarget, 1, MPI_INT, MPI_ANY_SOURCE, TAG_TARGET, MPI_COMM_WORLD, &status);
+						for(int i=1; i<size; i++){
+							if(slaveStop[i-1]==false){MPI_Bsend(NULL, 0, MPI_DOUBLE, i, TAG_TARGET, MPI_COMM_WORLD);}
+						}
 
 					}else if(status.MPI_TAG==TAG_FINALZ){ // Ordem RECV -> SEND p/ evitar deadlock 
 						MPI_Recv(&bsf_solution[0], (g_problem_size+1), MPI_DOUBLE, MPI_ANY_SOURCE, TAG_FINALZ, MPI_COMM_WORLD, &status);
@@ -205,33 +216,16 @@ if(rank==RANK_MESTRE){
 			}while(flagMensagem);
 
 			// Envio dos Padrões
-			if(canSend){
-				std::vector<MPI_Request> requests;
-				if(!patterns.empty() && ((patterns.size()/g_problem_size)>=1)){
-					for(int i=1; i<size; i++){
-						if(slaveStop[i-1]==false){
-							MPI_Request req;
-							//MPI_Isend(&patterns[0], patterns.size(), MPI_DOUBLE, i, TAG_MESTRE, MPI_COMM_WORLD, &req);
-							MPI_Bsend(&patterns[0], patterns.size(), MPI_DOUBLE, i, TAG_MESTRE, MPI_COMM_WORLD);
-							requests.push_back(req);
-						}
+			if(canSend && !patterns.empty() && ((patterns.size()/g_problem_size)>=1)){
+				for(int i=1; i<size; i++){
+					if(slaveStop[i-1]==false){
+						MPI_Bsend(&patterns[0], patterns.size(), MPI_DOUBLE, i, TAG_MESTRE, MPI_COMM_WORLD);
 					}
-
-					if(!requests.empty()){
-						printf("\nInit Wait\n");
-						//MPI_Waitall(requests.size(), requests.data(), MPI_STATUSES_IGNORE);
-						printf("End Wait\n");
-					}
-						
-					canSend = false;
-				}
+				} canSend = false;
 			}
 
-			
-
 			if(newMine){
-				printf("Iniciando Mineração de Num %zu\n", mineTime.size()+1);
-
+				printf("New Mine\n");
 				vector<vector<double>> data;
 				number_of_patterns = 0;//clusters_rate*(elite_rate*pop.size());
 				double startMine = MPI_Wtime();
@@ -251,8 +245,6 @@ if(rank==RANK_MESTRE){
 					xmeans solver(start_centers, pop.size(), 1e-4, splitting_type::BAYESIAN_INFORMATION_CRITERION, 1, seed);
 					solver.process(data, output_result);
 				}
-
-				printf("\tMinerou\n");
 				
 				patterns.clear();
 				auto centers = output_result.centers();
@@ -262,16 +254,12 @@ if(rank==RANK_MESTRE){
 					}
 				}
 
-				printf("Finalizou com %ld!\n ------------------------------\n", patterns.size());
 				mineTime.push_back(MPI_Wtime()-startMine);
 				newMine = false;
 				canSend = true;
 			}
 			
 		}
-		
-		//printPopMat(pop, g_problem_size, true);
-		
 	}
 
 
@@ -282,7 +270,8 @@ if(rank==RANK_MESTRE){
 		if(bestSolutions[i][g_problem_size] < bestSolutions[posBest][g_problem_size]){posBest=i;}
 	}
 	bsf_fitness  = bestSolutions[posBest][g_problem_size];
-	//bsf_solution.assign(bestSolutions[posBest].begin(), bestSolutions[posBest].end()-1);
+	//bsf_solution.assign(bestSolutions[posBest].begin(), bestSolutions[posBest].end()-1);	
+
 
 // Output
 	double execTime = MPI_Wtime()-start;
@@ -292,21 +281,21 @@ if(rank==RANK_MESTRE){
 
 	std::ofstream file(pathfile.str(), ios::app); // Escrever ao Final 
 	if(file.is_open()){
-		file << execTime << "," << bsf_fitness << "," << g_flag_diversidade << endl;
+		file << execTime << "," << bsf_fitness << "," << g_target << "," << g_flag_diversidade << endl;
 		file.close();
 	}
 
 // Print Results
+	MPI_Buffer_detach(buffer.data(), &buf_size);
 	if(!g_flag_script){
 		cout << "Melhor Fitness: "                      << bsf_fitness     << endl;
 		cout << "Tempo Execução: "                      << execTime        << endl;
+		cout << "Num Avaliações do Target: "            << numAvalTarget   << endl;
 		cout << "Quantidade de Minerações: "            << mineTime.size() << endl;
 		cout << "Média do Tempo de Mineração: "         << mean(mineTime)  << endl;
 		cout << "Desvio Padrão do Tempo de Mineração: " << stdev(mineTime) << endl;
 		// [TODO] Mean, Std Fitness Interno
 	}
-
-MPI_Buffer_detach(buffer.data(), &buf_size);
 
 }
 
@@ -404,10 +393,13 @@ if(rank>=RANK_LSHADE){
 	std::vector<double> buffer(buf_size);
 	MPI_Buffer_attach(buffer.data(), buf_size);
 
+	bool envieiTarget = false;
 
 // MAIN LOOP
     int _contSend = 0;
-	while(nfes < alg->max_num_evaluations){
+    bool running = true;
+	while(running){
+		running = (nfes < alg->max_num_evaluations);
 
 	// Ordena Elite
 		alg->generation++;
@@ -422,28 +414,33 @@ if(rank>=RANK_LSHADE){
 			for(int j=0; j<g_problem_size; j++){
 				tempElite.push_back(get<0>(alg->elite[i])[j]);
 			}	tempElite.push_back(get<1>(alg->elite[i])-alg->optimum);
-		} 
+		}
 
-	// Receber os Padrões
-		bool recebi = false;
+	// Receber Mensagens (Padrões e Finaliz_Target)
 		do{
-			MPI_Iprobe(RANK_MESTRE, TAG_MESTRE, MPI_COMM_WORLD, &flagMensagem, &status);
+			MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
 			if(flagMensagem){
-				recebi=true;
-				do{ // Verificar se estou com a mensagem mais recente
-					MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
-					patterns.resize(recvSize);
-					MPI_Recv(&patterns[0], recvSize, MPI_DOUBLE, RANK_MESTRE, TAG_MESTRE, MPI_COMM_WORLD, &status);
-					MPI_Iprobe(RANK_MESTRE, TAG_MESTRE, MPI_COMM_WORLD, &flagMensagem, &status);
-				}while(flagMensagem);
+				if(status.MPI_TAG==TAG_MESTRE){ // RECEBER PADRÕES
 
-				// Insere
-				for(size_t i=0; i<min((int)patterns.size()/g_problem_size, (int)alg->pop_size/2); i++){ // [TODO] Garantir que os padrões sejam sempre < alg->popSize
-					int idx = sorted_array[(alg->pop_size-1)-i];
-					for(size_t j=0; j<alg->problem_size; j++){
-						pop[idx][j] = patterns[i*g_problem_size+j];
+					do{ // Verificar se estou com a mensagem mais recente
+						MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
+						patterns.resize(recvSize);
+						MPI_Recv(&patterns[0], recvSize, MPI_DOUBLE, RANK_MESTRE, TAG_MESTRE, MPI_COMM_WORLD, &status);
+						MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
+					}while(flagMensagem);
+
+					for(size_t i=0; i<min((int)patterns.size()/g_problem_size, (int)alg->pop_size/2); i++){ // Insere
+						int idx = sorted_array[(alg->pop_size-1)-i];
+						for(size_t j=0; j<alg->problem_size; j++){
+							pop[idx][j] = patterns[i*g_problem_size+j];
+						}
 					}
+
+				}else if(status.MPI_TAG==TAG_TARGET){
+					MPI_Recv(NULL, 0, MPI_DOUBLE, RANK_MESTRE, TAG_TARGET, MPI_COMM_WORLD, &status);
+					running = false;
 				}
+
 			}
 		}while(flagMensagem);
 
@@ -451,14 +448,18 @@ if(rank>=RANK_LSHADE){
 		// Garantir que outro envio só seja feito apos concluido anterior
 		if(( (alg->generation+rank)%mining_generation_step==0) && (alg->elite.size()>0)){
 			_contSend++;
-			printf("[Escravo %d] Enviou Elite\n", rank);
 			MPI_Bsend(&tempElite[0], alg->elite.size()*(g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD);
-			//MPI_Send(&tempElite[0], alg->elite.size()*(g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD);
-			printf("[Escravo %d] Terminou de Enviar Elite\n", rank);
 		}	
-		
-	
 
+	// Condição de Parada do Target
+		if(!envieiTarget && (g_target>=0) && tempElite.size() && (tempElite[g_problem_size]<=g_target)){
+			MPI_Send(&nfes, 1, MPI_INT, RANK_MESTRE, TAG_TARGET, MPI_COMM_WORLD);
+			
+			//MPI_Recv(NULL, 0, MPI_INT, RANK_MESTRE, TAG_TARGET, MPI_COMM_WORLD, &status);
+			//running = false;
+			envieiTarget=true;
+		} 
+		
 // RESTO DO LSHADE
 		for(int target = 0; target < alg->pop_size; target++){
 			// In each generation, CR_i and F_i used by each individual x_i are generated by first selecting 
@@ -615,41 +616,35 @@ if(rank>=RANK_LSHADE){
 	
 	} // FIM MAIN WHILE
 
-	
-	// cout << "Melhor Solução = "; printPtrVet(bsf_solution, g_problem_size);
-
-
+	free(temp_fit);	
 	MPI_Buffer_detach(buffer.data(), &buf_size);
-
-	free(temp_fit);
-	// MPI Finalização
 	bsf_solution[bsf_solution.size()-1] = bsf_fitness;
 	
-
-
 // FINALIZAÇÃO ESCRAVO
-		MPI_Send(&bsf_solution[0], (g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_FINALZ, MPI_COMM_WORLD);
-		bool _end=false;
-		do{
-			MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
-			if(flagMensagem){
-				if(status.MPI_TAG==TAG_MESTRE){
-					MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
-					patterns.resize(recvSize);
-					MPI_Recv(&patterns[0], recvSize, MPI_DOUBLE, RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);	
-				}
-				if(status.MPI_TAG==TAG_FINALZ){
-					MPI_Recv(NULL, 0, MPI_DOUBLE, RANK_MESTRE, TAG_FINALZ, MPI_COMM_WORLD, &status);
-					_end=true;
-				}
+	MPI_Send(&bsf_solution[0], (g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_FINALZ, MPI_COMM_WORLD);
+	bool _end=false;
+	do{
+		MPI_Iprobe(RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &flagMensagem, &status);
+		if(flagMensagem){
+			if(status.MPI_TAG==TAG_MESTRE){
+				MPI_Get_count(&status, MPI_DOUBLE, &recvSize);
+				patterns.resize(recvSize);
+				MPI_Recv(&patterns[0], recvSize, MPI_DOUBLE, RANK_MESTRE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);	
 			}
-		}while(flagMensagem || !_end);
-
-	printf("ESCRAVO %d Finalizou (%d Envios)!!\n\n\n", rank, _contSend);
+			if(status.MPI_TAG==TAG_TARGET){
+				MPI_Recv(NULL, 0, MPI_DOUBLE, RANK_MESTRE, TAG_TARGET, MPI_COMM_WORLD, &status);
+			}
+			if(status.MPI_TAG==TAG_FINALZ){
+				MPI_Recv(NULL, 0, MPI_DOUBLE, RANK_MESTRE, TAG_FINALZ, MPI_COMM_WORLD, &status);
+				_end=true;
+			}
+		}
+	}while(flagMensagem || !_end);
 
 }
 
 
 	MPI_Finalize();
+	// printf("Processo %d Finalizou!\n", rank);
 	return 0;
 }
