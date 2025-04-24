@@ -123,7 +123,7 @@ int main(int argc, char **argv){
 	vector<double> patterns; // Also MPI Parameter
 	double          elite_rate = 0.1;
 	double       clusters_rate = 0.1468;
-	int mining_generation_step = 50; // "Min" - 25; Raphael 168;
+	int mining_generation_step = 100; // "Min" - 25; Raphael 168;
 
 // MPI Parametros
 	vector<double> tempElite(std::round(elite_rate*g_pop_size)*(g_problem_size+1));
@@ -157,7 +157,7 @@ if(rank==RANK_MESTRE){
 	int buf_size;
 	MPI_Pack_size(g_problem_size, MPI_DOUBLE, MPI_COMM_WORLD, &buf_size);
 	buf_size += MPI_BSEND_OVERHEAD;
-	buf_size *= 400; // "Min" -> 150
+	buf_size *= 2000; // "Min" -> 150
 
 	int numAvalTarget=0; // Avaliações de Target
 	std::vector<double> buffer(buf_size);
@@ -225,7 +225,7 @@ if(rank==RANK_MESTRE){
 			}
 
 			if(newMine){
-				printf("New Mine\n");
+				printf("New Mine %d\n", mineTime.size());
 				vector<vector<double>> data;
 				number_of_patterns = 0;//clusters_rate*(elite_rate*pop.size());
 				double startMine = MPI_Wtime();
@@ -388,7 +388,7 @@ if(rank>=RANK_LSHADE){
 	int buf_size;
 	MPI_Pack_size(g_pop_size*elite_rate*(g_problem_size+1), MPI_DOUBLE, MPI_COMM_WORLD, &buf_size);
 	buf_size += MPI_BSEND_OVERHEAD;
-	buf_size *= 50; // 20 Funciona (NP=8 MAXVAR=100 GenStep=25), pra segunrança Usar 50; 
+	buf_size *= 250; // 20 Funciona (NP=8 MAXVAR=100 GenStep=25), pra segunrança Usar 50; 
 
 	std::vector<double> buffer(buf_size);
 	MPI_Buffer_attach(buffer.data(), buf_size);
