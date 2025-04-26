@@ -119,11 +119,11 @@ int main(int argc, char **argv){
 	g_p_best_rate = 0.11;
 
 // DM-L-SHADE parameters
-	int number_of_patterns;
 	vector<double> patterns; // Also MPI Parameter
 	double          elite_rate = 0.1;
 	double       clusters_rate = 0.1468;
 	int mining_generation_step = 100; // "Min" - 25; Raphael 168;
+	int number_of_patterns = clusters_rate*(elite_rate*g_pop_size); // 0 for Xmeans
 
 // MPI Parametros
 	vector<double> tempElite(std::round(elite_rate*g_pop_size)*(g_problem_size+1));
@@ -225,9 +225,9 @@ if(rank==RANK_MESTRE){
 			}
 
 			if(newMine){
-				printf("New Mine %d\n", mineTime.size());
+				if(!g_flag_script){printf("New Mine %d\n", (int)mineTime.size());}
 				vector<vector<double>> data;
-				number_of_patterns = 0;//clusters_rate*(elite_rate*pop.size());
+				number_of_patterns = clusters_rate*(elite_rate*pop.size()); //0
 				double startMine = MPI_Wtime();
 				for(auto& [ind, fit] : pop){data.emplace_back(ind.begin(), ind.begin() + g_problem_size);}
 
@@ -445,7 +445,6 @@ if(rank>=RANK_LSHADE){
 		}while(flagMensagem);
 
 	// MPI ENVIA ELITE 
-		// Garantir que outro envio só seja feito apos concluido anterior
 		if(( (alg->generation+rank)%mining_generation_step==0) && (alg->elite.size()>0)){
 			_contSend++;
 			MPI_Bsend(&tempElite[0], alg->elite.size()*(g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD);
@@ -454,9 +453,6 @@ if(rank>=RANK_LSHADE){
 	// Condição de Parada do Target
 		if(!envieiTarget && (g_target>=0) && tempElite.size() && (tempElite[g_problem_size]<=g_target)){
 			MPI_Send(&nfes, 1, MPI_INT, RANK_MESTRE, TAG_TARGET, MPI_COMM_WORLD);
-			
-			//MPI_Recv(NULL, 0, MPI_INT, RANK_MESTRE, TAG_TARGET, MPI_COMM_WORLD, &status);
-			//running = false;
 			envieiTarget=true;
 		} 
 		

@@ -139,12 +139,10 @@ double DMLSHADE::run(){
 			mu_cr = memory_cr[random_selected_period];
 
 			// generate CR_i and repair its value
-			if(mu_cr == -1)
-			{
+			if(mu_cr == -1){
 				pop_cr[target] = 0;
 			}
-			else
-			{
+			else{
 				pop_cr[target] = gauss(mu_cr, 0.1);
 				if(pop_cr[target] > 1)
 					pop_cr[target] = 1;
@@ -153,8 +151,7 @@ double DMLSHADE::run(){
 			}
 
 			// generate F_i and repair its value
-			do
-			{
+			do{
 				pop_sf[target] = cauchy_g(mu_sf, 0.1);
 			} while (pop_sf[target] <= 0);
 
@@ -182,44 +179,31 @@ double DMLSHADE::run(){
 			if((children_fitness[i] - optimum) < epsilon)
 				children_fitness[i] = optimum;
 
-			if(children_fitness[i] < bsf_fitness)
-			{
+			if(children_fitness[i] < bsf_fitness){
 				bsf_fitness = children_fitness[i];
 				for(int j=0; j<problem_size; j++)
 					bsf_solution[j] = children[i][j];
 			}
 
-			// if(nfes % 1000 == 0){
-			// //      cout << nfes << " " << bsf_fitness - optimum << endl;
-			// 	cout << bsf_fitness - optimum << endl;
-			// }
-			if(nfes >= max_num_evaluations)
-				break;
+			if(nfes >= max_num_evaluations){break;}
 		}
 		////////////////////////////////////////////////////////////////////////////
 
 		// generation alternation
 		for(int i=0; i<pop_size; i++){
-			if(children_fitness[i] == fitness[i])
-			{
+			if(children_fitness[i] == fitness[i]){
 				fitness[i] = children_fitness[i];
 				for(int j=0; j<problem_size; j++)
 					pop[i][j] = children[i][j];
-			}
-			else if(children_fitness[i] < fitness[i])
-			{
+			}else if(children_fitness[i] < fitness[i]){
 				// parent vectors x_i which were worse than the trial vectors u_i are preserved
-				if(arc_size > 1)
-				{
-					if(arc_ind_count < arc_size)
-					{
+				if(arc_size > 1){
+					if(arc_ind_count < arc_size){
 						for(int j=0; j<problem_size; j++)
 							archive[arc_ind_count][j] = pop[i][j];
 						arc_ind_count++;
-					}
 					// Whenever the size of the archive exceeds, randomly selected elements are deleted to make space for the newly inserted elements
-					else
-					{
+					}else{
 						random_selected_arc_ind = rand() % arc_size;
 						for(int j=0; j<problem_size; j++)
 							archive[random_selected_arc_ind][j] = pop[i][j];
@@ -247,12 +231,10 @@ double DMLSHADE::run(){
 			temp_sum_cr = 0;
 			sum = 0;
 
-			for(int i=0; i<num_success_params; i++)
-				sum += dif_fitness[i];
+			for(int i=0; i<num_success_params; i++){sum += dif_fitness[i];}
 
 			// weighted lehmer mean
-			for(int i=0; i<num_success_params; i++)
-			{
+			for(int i=0; i<num_success_params; i++){
 				weight = dif_fitness[i] / sum;
 
 				memory_sf[memory_pos] += weight * success_sf[i] * success_sf[i];
