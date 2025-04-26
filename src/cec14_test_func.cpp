@@ -98,7 +98,7 @@ void cec14_test_func(double*x, double*f, int nx, int mx,int func_num){
 		/* Load Matrix M*/
 		sprintf(FileName, "src/input_data/M_%d_D%d.txt", func_num,nx);
 		fpt = fopen(FileName,"r");
-		if (fpt==NULL)
+		if(fpt==NULL)
 		{
 		    printf("\n Error: Cannot open input file for reading \n");
 		}

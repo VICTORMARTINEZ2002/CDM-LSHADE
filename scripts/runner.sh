@@ -1,16 +1,14 @@
 #!/bin/bash
 
-runs=$(seq 1 5)
+runs=$(seq 1 2)
 n_values=(1 8 6 4 2)
 diversd_values=(1)
 funcao_values=$(seq 1 30)
-maxvar_values=(100 50 20 10)
-
-make build
-clear
+maxvar_values=(100 50 30 20 10)
 
 mkdir -p ./output/report
 mkdir -p ./output/logs
+make build
 
 for run in $runs; do
 	for n in "${n_values[@]}"; do
