@@ -2,7 +2,7 @@ HEADER = de.h
 OUTPUT = solver
 
 OBJS := $(patsubst %.cpp,%.o,$(shell find src -name '*.cpp'))
-OPTION = -std=c++14 -O3
+OPTION = -std=c++17 -O3
 
 # Link the static library directly
 LDFLAGS = ./lib/libpyclustering.a -lm

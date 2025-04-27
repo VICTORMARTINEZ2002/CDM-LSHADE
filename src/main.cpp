@@ -1,7 +1,9 @@
 #include <mpi.h>
 #include <limits>
+#include <format>
 #include <cstdlib>   // Clear System
 #include <algorithm> // Sort
+#include <filesystem>
 
 #include <pyclustering/cluster/kmeans.hpp>
 #include <pyclustering/cluster/xmeans.hpp>
@@ -9,6 +11,7 @@
 
 using namespace pyclustering;
 using namespace pyclustering::clst;
+namespace fs = std::filesystem;
 
 #include "de.h"
 #include "print.h"
@@ -76,9 +79,8 @@ void inserirPopMestre(vector<pair<vector<double>, double>>& pop, vector<double>&
 		pop.erase(pop.begin()+intv[rank-1]+slaveSize, pop.begin()+intv[rank]+tam);		
 	}else{ // Total
 		sort(pop.begin(), pop.end(), [](auto& a, auto& b){return a.second < b.second;});
-		pop.erase(pop.begin()+popSize, pop.end());
+		pop.resize(popSize);
 	}
-	// TODO - COntrole tamanho da Pop
 }
 
 
@@ -126,7 +128,7 @@ int main(int argc, char **argv){
 // MPI Parametros
 	vector<double> tempElite(std::round(elite_rate*g_pop_size)*(g_problem_size+1));
 	double _slaveSlice = round(g_pop_size*elite_rate*(g_fator_slaveSize/100.0)); // DEBUG: 300;
-	int slaveSize      = max(3, static_cast<int>(_slaveSlice));
+	int slaveSize      = max(1, static_cast<int>(_slaveSlice));
 	int recvSize;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -267,10 +269,12 @@ if(rank==RANK_MESTRE){
 // Output
 	double execTime = MPI_Wtime()-start;
 
-	std::ostringstream pathFile;
-	pathFile << "./output/logs/" << g_function_number << "-" << g_problem_size << "-" << size << ".log";
-	std::ofstream file(pathFile.str(), std::ios::app); // Append 
-	file << execTime << "," << bsf_fitness << "," << g_target << "," << g_flag_diversidade << endl;
+
+	fs::path pathdir = "./output/logs/" + to_string(g_function_number);
+    if (!fs::exists(pathdir)) fs::create_directories(pathdir);
+    pathdir /= (to_string(g_function_number) + "-" + to_string(g_problem_size) + "-" + to_string(size) + ".log");
+    ofstream file(pathdir, ios::app); // Append
+    file << execTime << "," << bsf_fitness << "," << g_target << "," << g_flag_diversidade << endl;
 
 // Print Results
 	MPI_Buffer_detach(buffer.data(), &buf_size);
@@ -395,12 +399,12 @@ if(rank>=RANK_LSHADE){
 		alg->sortIndexWithQuickSort(&temp_fit[0], 0, alg->pop_size-1, sorted_array); // Sorted: sorted_array ordenado com a posição dos melhores individuos;
 		alg->updateElite(pop, fitness, sorted_array); // Mining steps
 		
-		tempElite.clear();
-		for(int i=0; i<alg->elite.size(); i++){
-			for(int j=0; j<g_problem_size; j++){
-				tempElite.push_back(get<0>(alg->elite[i])[j]);
-			}	tempElite.push_back(get<1>(alg->elite[i])-alg->optimum);
-		}
+		// tempElite.clear();
+		// for(int i=0; i<alg->elite.size(); i++){
+		// 	for(int j=0; j<g_problem_size; j++){
+		// 		tempElite.push_back(get<0>(alg->elite[i])[j]);
+		// 	}	tempElite.push_back(get<1>(alg->elite[i])-alg->optimum);
+		// }
 
 	// Receber Mensagens (Padrões e Finaliz_Target)
 		do{
@@ -432,6 +436,15 @@ if(rank>=RANK_LSHADE){
 
 	// MPI ENVIA ELITE 
 		if(( (alg->generation+rank)%mining_generation_step==0) && (alg->elite.size()>0)){
+			tempElite.clear();
+			// Em gerações de Mineração, como os Padrões São inseridos no lugar dos piores
+			// então eles não são enviados de volta na mesma geração.
+			for(int i=0; i<slaveSize; i++){
+				for(int j=0; j<g_problem_size; j++){
+					tempElite.push_back(get<0>(alg->elite[i])[j]);
+				}	tempElite.push_back(get<1>(alg->elite[i])-alg->optimum);
+			}
+
 			printf("Vou Enviar Elite\n");
 			MPI_Bsend(&tempElite[0], alg->elite.size()*(g_problem_size+1), MPI_DOUBLE, RANK_MESTRE, TAG_LSHADE, MPI_COMM_WORLD);
 			printf("Enviei Elite\n");
@@ -439,9 +452,12 @@ if(rank>=RANK_LSHADE){
 
 	// Condição de Parada do Target
 		double nnfes = (double)nfes;
-		if(!envieiTarget && (g_target>=0) && tempElite.size() && (tempElite[g_problem_size]<=g_target)){
-			MPI_Bsend(&nnfes, 1, MPI_DOUBLE, RANK_MESTRE, TAG_TARGET, MPI_COMM_WORLD);
-			envieiTarget=true;
+		if((g_target>=0) && !envieiTarget){
+			double _fitness = get<1>(alg->elite[0])-alg->optimum;
+			if(alg->elite.size() && (_fitness<=g_target)){
+				MPI_Bsend(&nnfes, 1, MPI_DOUBLE, RANK_MESTRE, TAG_TARGET, MPI_COMM_WORLD);
+				envieiTarget=true;
+			}
 		} 
 		
 // RESTO DO LSHADE
