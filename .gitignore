@@ -13,4 +13,5 @@
 
 output/logs/*
 output/report/*
+scripts/runsCounter.txt
 solver

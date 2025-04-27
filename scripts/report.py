@@ -1,44 +1,51 @@
 import argparse
 import pandas as pd
 from pathlib import Path
-
+import matplotlib.pyplot as plt
 
 
 if __name__ == '__main__':
 	# Argumentos do CLI
 	parser = argparse.ArgumentParser()
-	parser.add_argument('fun', type=str, help='Número da função: 1-30')
+	parser.add_argument('fun', type=int, help='Número da função: 1-30')
 	args = parser.parse_args()
 
 	# Filtra arquivos
-	dir = Path('./output/logs')
-	files = [
-		file for file in dir.iterdir()
-		if file.is_file() and file.stem.startswith(args.fun) and file.suffix == '.log'
-	]
+	root = Path(f'./output/logs/{args.fun}')
+	files = [path for path in root.iterdir() if path.is_file() and path.suffix == '.log']
 
-	# DataFrame
-	df = pd.DataFrame(columns=["Diversidade", "Var", "P", "Time", "Fit"])
-
+	# Leitura dos Arquivos
+	data = list()
 	for file in files:
 		_, var, p = file.name.removesuffix('.log').split('-')
 		with open(file) as f:
 			for line in f:
-				time, fit, div  = line.strip().split(',')
-				df = df.append({
-					"Diversidade": div,
-					"Var": var,
-					"P": p,
-					"Time": time,
-					"Fit": fit,
-				}, ignore_index=True)
+				time, fit, _, d = line.strip().split(',')
+				data.append({
+					'Diversidade': int(d),
+					'Var': int(var),
+					'P': int(p),
+					'Time': float(time),
+					'Fit': float(fit),
+				})
 
+	# Criar o DataFrame
+	df = pd.DataFrame(data, columns=['Diversidade', 'Var', 'P', 'Time', 'Fit'])
 
+	# Gráficos Básicos
+	for s in ['Time', 'Fit']:
+		for d in [0, 1]:
+			for var in [10, 20, 50, 100]:
+				filtered_df = df[(df['Diversidade'] == d) & (df['Var'] == var)]
+				mean = filtered_df.groupby('P')[s].mean().reset_index()
 
-	print(df)
+				plt.figure(figsize=(8, 6))
+				plt.plot(mean['P'], mean[s], marker='o', linestyle='-', color='b')
 
-# Gráficos
-# - Time x p
-# - Fitness x p
-# - Fitness x Population_Size (for each p)
-# - Time x Population_Size (for each p)
+				plt.title(f'Gráfico de Média de {s} x P (Diversidade={d}, Var={var})')
+				plt.xticks([1, 2, 4, 6, 8])
+				plt.ylabel(f'Média de {s}')
+				plt.xlabel('Processos')
+
+				plt.savefig(f'./output/report/img/{s}_x_P_d={d}_var={var}.png', dpi=300)
+				plt.close()
