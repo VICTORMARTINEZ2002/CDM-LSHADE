@@ -7,11 +7,10 @@
 *.out
 *.app
 
+*.txt
 *.log
 *.tmp
 *.d
 
-output/logs/*
-output/report/*
-scripts/runsCounter.txt
+/output/
 solver
