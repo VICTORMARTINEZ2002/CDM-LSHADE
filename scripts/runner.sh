@@ -1,7 +1,7 @@
 #!/bin/bash
 
-runs=$(seq 1 2)
-n_values=(1 8 6 4 2)
+runs=$(seq 1 15)
+n_values=(1 2 3 4 5 6  8 9 10)
 diversd_values=(1)
 funcao_values=$(seq 1 30)
 maxvar_values=(100 50 30 20 10)

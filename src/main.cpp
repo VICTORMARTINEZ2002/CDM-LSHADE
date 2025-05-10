@@ -165,6 +165,7 @@ if(rank==RANK_MESTRE){
 
 // N=1 
 	if(size==1){
+		//LSHADE *alg = new LSHADE();
 		DMLSHADE *alg = new DMLSHADE(std::round(elite_rate*g_pop_size), number_of_patterns, mining_generation_step);
 		bestSolutions[0][g_problem_size] = alg->run();
 	
