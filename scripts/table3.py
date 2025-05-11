@@ -31,7 +31,7 @@ ALGS = [
 
 HEADER = [
 	f'% v={args.v}, d={args.d}, alg1={args.alg1}, alg2={args.alg2}, alg3={args.alg3}\n',
-	'\\begin{table}[!t]\n',
+	'\\begin{table}[!ht]\n',
 	'\t\\begin{adjustbox}{width=\\textwidth}\n',
 	'\t\\begin{tabular}{c c c c c l c c c c l c c c c l c c}\n',
 	'\t\t\\toprule\n',
@@ -50,7 +50,9 @@ HEADER = [
 ]
 
 FOOTER = '''
-\t\t\\\\\\bottomrule
+\t\t\\vspace{-4pt}
+\t\t\\\\
+\t\t\\bottomrule
 \t\\end{tabular}
 \\end{adjustbox}
 \\caption{Legendas}
